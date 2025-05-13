@@ -1,4 +1,4 @@
-// fixed_dummy_data.js (장애 상황 및 리소스 사용률 상향 최종 조정)
+// fixed_dummy_data.js (장애 상황 대폭 강화 및 분산 버전)
 
 function getFixedDummyData() {
     const servers = [];
@@ -31,152 +31,161 @@ function getFixedDummyData() {
     const data = [];
     const baseEndDate = new Date(); 
     const startDate = new Date(baseEndDate);
-    startDate.setHours(baseEndDate.getHours() - 24); // 최근 24시간 데이터
+    startDate.setHours(baseEndDate.getHours() - 24); 
 
     let currentTime = new Date(startDate);
 
-    const alertPool = [ /* 이전 답변의 alertPool 사용 */
-        { type: 'CPU', severity: 'Critical', message: "CPU 사용률 임계치(90%) 초과", keywords: ["cpu", "critical", "사용률", "초과"] },
-        { type: 'CPU', severity: 'Warning', message: "CPU 부하 지속적 높음 (75% 이상)", keywords: ["cpu", "warning", "부하", "높음"] },
-        { type: 'Memory', severity: 'Critical', message: "사용 가능 메모리 매우 부족 (1GB 미만)", keywords: ["memory", "critical", "메모리", "부족"] }, // 메시지 구체화
-        { type: 'Memory', severity: 'Warning', message: "메모리 사용률 높음 (85% 이상 지속)", keywords: ["memory", "warning", "사용률", "높음", "지속"] }, 
-        { type: 'Disk', severity: 'Critical', message: "디스크 공간 부족 (/data 파티션 95% 사용)", keywords: ["disk", "critical", "공간", "부족", "/data"] }, 
-        { type: 'Disk', severity: 'Warning', message: "디스크 I/O 응답 시간 평균 500ms 초과", keywords: ["disk", "warning", "i/o", "지연", "500ms"] },
-        { type: 'Network', severity: 'Error', message: "외부 네트워크(Outbound) 트래픽 500Mbps 초과", keywords: ["network", "error", "트래픽", "outbound", "500Mbps"] }, 
-        { type: 'Process', severity: 'Critical', message: "주요 프로세스(OrderService) 응답 없음 - 재시작 필요", keywords: ["process", "critical", "OrderService", "응답없음", "재시작"] }, 
-        { type: 'Security', severity: 'Critical', message: "비정상 다수 로그인 시도 감지 (Admin 계정, IP:1.2.3.4)", keywords: ["security", "critical", "login", "admin", "1.2.3.4"] }, 
-        { type: 'Batch', severity: 'Error', message: "야간 사용자 동기화 배치 작업(BATCH_USER_SYNC_01) 실패 - 코드: B500", keywords: ["batch", "error", "실패", "BATCH_USER_SYNC_01", "B500"] }, 
-        { type: 'Database', severity: 'Critical', message: "DB 연결 풀 고갈 (prod-db-mysql-master-01) - 모든 연결 사용 중", keywords: ["database", "critical", "prod-db-mysql-master-01", "고갈"] } 
+    const alertPool = [ /* 이전 답변의 alertPool 사용, 필요시 메시지 구체화 */
+        { type: 'CPU', severity: 'Critical', message: "CPU 사용률 95% 초과! 즉각 확인 필요.", keywords: ["cpu", "critical", "95%"] }, //0
+        { type: 'CPU', severity: 'Warning', message: "CPU 부하 80% 이상 지속됨.", keywords: ["cpu", "warning", "80%"] }, //1
+        { type: 'Memory', severity: 'Critical', message: "가용 메모리 100MB 미만! OOM 위험.", keywords: ["memory", "critical", "100MB"] }, //2
+        { type: 'Memory', severity: 'Warning', message: "메모리 사용률 88% 이상 지속, 누수 의심.", keywords: ["memory", "warning", "88%", "누수"] }, //3
+        { type: 'Disk', severity: 'Critical', message: "디스크 /data 파티션 사용률 98% 도달!", keywords: ["disk", "critical", "/data", "98%"] }, //4
+        { type: 'Disk', severity: 'Warning', message: "디스크 I/O 대기 시간 급증 (평균 600ms).", keywords: ["disk", "warning", "i/o", "600ms"] }, //5
+        { type: 'Network', severity: 'Error', message: "Outbound 트래픽 800Mbps 초과, 비정상 패턴.", keywords: ["network", "error", "outbound", "800Mbps"] }, //6
+        { type: 'Process', severity: 'Critical', message: "주요 결제 프로세스(PaymentGateway) 응답 없음.", keywords: ["process", "critical", "PaymentGateway", "응답없음"] }, //7
+        { type: 'Security', severity: 'Critical', message: "다수 국가에서 Admin 계정 로그인 시도 발생!", keywords: ["security", "critical", "login", "admin", "다수 국가"] }, //8
+        { type: 'Batch', severity: 'Error', message: "일일 정산 배치(BATCH_DAILY_SETTLE_01) 처리 실패. 원인: DB Timeout.", keywords: ["batch", "error", "실패", "BATCH_DAILY_SETTLE_01", "DB Timeout"] }, //9
+        { type: 'Database', severity: 'Critical', message: "DB 연결 불가! (prod-db-pgsql-01) 모든 연결 사용 중 또는 다운 의심.", keywords: ["database", "critical", "prod-db-pgsql-01", "연결불가"] }, //10
+        { type: 'Application', severity: 'Error', message: "사용자 인증 서비스(AuthService) 장애 발생. (503 Service Unavailable)", keywords: ["application", "error", "AuthService", "503"] }, //11
+        { type: 'Process', severity: 'Warning', message: "Tomcat 프로세스 CPU 사용률 과다 (stg-was-tomcat-01)", keywords: ["process", "warning", "tomcat", "cpu"] } //12
     ];
 
-    // --- 장애 시나리오: 최근 시간대에 더 명확하고 다양하게 발생 ---
-    const criticalTimeConfig = [ // 시간대별 장애 시나리오
-        { startHourAgo: 0.5, endHourAgo: 0, // 지금부터 30분 전 사이 (가장 최근)
-          problemServers: [servers[1].serverHostname, servers[15].serverHostname], // 예: prod-was-tomcat-01, stg-api-ordersvc-01
-          scenario: 'HIGH_CPU_AND_APP_ERROR' },
-        { startHourAgo: 2, endHourAgo: 1, // 2시간 전 ~ 1시간 전
-          problemServers: [servers[2].serverHostname, servers[20].serverHostname], // 예: prod-db-mysql-master-01, dev-search-elasticsearch-01
-          scenario: 'DB_DISK_FULL_AND_SEARCH_SLOW' },
-        { startHourAgo: 5, endHourAgo: 3, // 5시간 전 ~ 3시간 전
-          problemServers: [servers[5].serverHostname, servers[8].serverHostname, servers[25].serverHostname], // 예: stg-was-node-01, dev-batch-worker-01, prod-cache-redis-01
-          scenario: 'WAS_MEMORY_LEAK_AND_BATCH_FAIL_AND_CACHE_LATENCY' }
-    ];
+    // --- 장애 시나리오: 30개 중 20개 이상이 최근 24시간 내 다양한 시간에 문제 발생 ---
+    const criticalTimeConfig = [];
+    const problematicServers = new Set(); // 중복 방지
+
+    // 시나리오 1: 최근 0~1시간 사이 (5개 서버) - 가장 긴급한 상황
+    for(let i=0; i<5; i++) {
+        const serverIdx = i; // 0, 1, 2, 3, 4
+        problematicServers.add(servers[serverIdx].serverHostname);
+        criticalTimeConfig.push({ 
+            startHourAgo: 1, endHourAgo: 0, serverHostname: servers[serverIdx].serverHostname,
+            forcedStats: { cpuUsage: 90 + Math.random()*9, memoryUsage: 85 + Math.random()*10, status: 'Critical' }, 
+            alerts: [alertPool[0], (Math.random() < 0.5 ? alertPool[2] : alertPool[7])] // CPU Critical + Memory Critical 또는 Process Critical
+        });
+    }
+
+    // 시나리오 2: 최근 1~3시간 사이 (5개 서버) - 심각도 높은 Warning 또는 Error
+     for(let i=0; i<5; i++) {
+        const serverIdx = 5 + i; // 5, 6, 7, 8, 9
+        problematicServers.add(servers[serverIdx].serverHostname);
+        criticalTimeConfig.push({ 
+            startHourAgo: 3, endHourAgo: 1, serverHostname: servers[serverIdx].serverHostname,
+            forcedStats: { diskUsage: 85 + Math.random()*10, networkTrafficOut: 300 + Math.random()*100, status: 'Error' }, 
+            alerts: [alertPool[5], alertPool[6]] // Disk Warning, Network Error
+        });
+    }
+    
+    // 시나리오 3: 최근 3~6시간 사이 (5개 서버) - 다양한 타입의 Warning/Error
+    for(let i=0; i<5; i++) {
+        const serverIdx = 10 + i; // 10, 11, 12, 13, 14
+        problematicServers.add(servers[serverIdx].serverHostname);
+        criticalTimeConfig.push({ 
+            startHourAgo: 6, endHourAgo: 3, serverHostname: servers[serverIdx].serverHostname,
+            forcedStats: { cpuUsage: 70 + Math.random()*15, memoryUsage: 75 + Math.random()*10 }, 
+            alerts: [alertPool[1], alertPool[3], (servers[serverIdx].serverType === 'API' ? alertPool[11] : alertPool[8])] // CPU/Mem Warning + App 또는 Security
+        });
+    }
+
+    // 시나리오 4: 최근 6~12시간 사이 (5개 서버) - 특정 타입 서버에 집중된 문제
+    for(let i=0; i<5; i++) {
+        const serverIdx = 15 + i; // 15, 16, 17, 18, 19
+        problematicServers.add(servers[serverIdx].serverHostname);
+        let scenarioAlerts = [];
+        let forcedS = {};
+        if (servers[serverIdx].serverType === 'DB') {
+            forcedS = {diskUsage: 92, status: 'Critical'}; scenarioAlerts = [alertPool[4], alertPool[10]];
+        } else if (servers[serverIdx].serverType === 'BATCH') {
+            forcedS = {status: 'Error'}; scenarioAlerts = [alertPool[9]];
+        } else {
+            forcedS = {memoryUsage: 85, status: 'Warning'}; scenarioAlerts = [alertPool[3]];
+        }
+        criticalTimeConfig.push({ 
+            startHourAgo: 12, endHourAgo: 6, serverHostname: servers[serverIdx].serverHostname,
+            forcedStats: forcedS, alerts: scenarioAlerts
+        });
+    }
+    
+    // 시나리오 5: 나머지 서버 중 일부에도 가벼운 Warning 또는 Info를 최근 24시간 내 랜덤하게 발생 (20개 채우기)
+    let warningServerCount = 0;
+    for(let i = 0; i < servers.length && problematicServers.size < 22; i++) { // 최대 22개까지 문제 서버 확보
+        if (!problematicServers.has(servers[i].serverHostname)) {
+            problematicServers.add(servers[i].serverHostname);
+            criticalTimeConfig.push({
+                startHourAgo: 18 + Math.random()*6, endHourAgo: 12 + Math.random()*6, // 12~24시간 전 사이 랜덤 시간
+                serverHostname: servers[i].serverHostname,
+                forcedStats: { cpuUsage: 60 + Math.random()*20 }, // 약간 높은 CPU
+                alerts: [alertPool[1]] // CPU Warning
+            });
+            warningServerCount++;
+        }
+    }
+    console.log("총 문제 시나리오 주입 서버 수: " + problematicServers.size);
 
 
     while (currentTime <= baseEndDate) {
-        servers.forEach((server, serverIndex) => {
-            // 기본 랜덤 사용률 (평소에는 좀 더 낮게, 장애 시에만 높게)
-            let cpu = 5 + Math.random() * 45; // 5-50%
-            let mem = 10 + Math.random() * 50; // 10-60%
-            let disk = Math.max(5, 10 + Math.random() * 60); // 10-70%
-            let netOut = Math.floor(10 + Math.random() * 80); // 10-90 Mbps
-            let netIn = Math.floor(5 + Math.random() * 60);  // 5-65 Mbps
-            let proc = 30 + Math.floor(Math.random() * 40) + (server.serverType === 'WAS' || server.serverType === 'BATCH' ? 20 : 0);
+        servers.forEach((server) => {
+            let cpu = 5 + Math.random() * 40; let mem = 10 + Math.random() * 45;
+            let disk = Math.max(5, 10 + Math.random() * 55);
+            let netOut = Math.floor(10 + Math.random() * 70); let netIn = Math.floor(5 + Math.random() * 50);
+            let procCnt = 30 + Math.floor(Math.random() * 30) + (server.serverType === 'WAS' || server.serverType === 'BATCH' ? 15 : 0);
             
             let currentServerAlerts = [];
             let serverStatus = 'Normal';
             let serverHighestSeverityScore = 0;
 
-            const hoursAgoCurrent = (baseEndDate.getTime() - currentTime.getTime()) / (1000 * 60 * 60);
+            const hoursAgo = (baseEndDate.getTime() - currentTime.getTime()) / (1000 * 60 * 60);
 
-            // 현재 시간에 해당하는 장애 시나리오 적용
             for (const config of criticalTimeConfig) {
-                if (hoursAgoCurrent >= config.endHourAgo && hoursAgoCurrent < config.startHourAgo) {
-                    if (config.problemServers.includes(server.serverHostname)) {
-                        let alertToPush = null;
-                        switch (config.scenario) {
-                            case 'HIGH_CPU_AND_APP_ERROR':
-                                if (server.serverType === 'WAS' || server.serverType === 'WEB' || server.serverType === 'API') {
-                                    cpu = 85 + Math.random() * 14; // 85-99%
-                                    alertToPush = JSON.parse(JSON.stringify(alertPool[0])); // CPU Critical
-                                    alertToPush.message = alertToPush.message.replace("90%", `${cpu.toFixed(1)}%`);
-                                    if (Math.random() < 0.7) { // 앱 에러 동시 발생 확률
-                                        const appErrorAlert = JSON.parse(JSON.stringify(alertPool[7]));
-                                        appErrorAlert.timestamp = currentTime.toISOString();
-                                        currentServerAlerts.push(appErrorAlert);
-                                    }
-                                }
-                                break;
-                            case 'DB_DISK_FULL_AND_SEARCH_SLOW':
-                                if (server.serverType === 'DB') {
-                                    disk = 93 + Math.random() * 6; // 93-99%
-                                    mem = 70 + Math.random() * 20; // DB 메모리도 높게
-                                    alertToPush = JSON.parse(JSON.stringify(alertPool[4])); // Disk Critical
-                                    alertToPush.message = alertToPush.message.replace("95%", `${disk.toFixed(1)}%`);
-                                } else if (server.serverType === 'SEARCH') {
-                                    cpu = 70 + Math.random() * 20; // 검색엔진 CPU 부하
-                                    alertToPush = JSON.parse(JSON.stringify(alertPool[1])); // CPU Warning
-                                    alertToPush.message = alertToPush.message.replace("75%", `${cpu.toFixed(1)}%`);
-                                    // 검색 지연 관련 Info 경고 추가 가능
-                                }
-                                break;
-                            case 'WAS_MEMORY_LEAK_AND_BATCH_FAIL_AND_CACHE_LATENCY':
-                                if (server.serverType === 'WAS') {
-                                    mem = 88 + Math.random() * 11; // 88-99%
-                                    alertToPush = JSON.parse(JSON.stringify(alertPool[3])); // Memory Warning (지속적 높음)
-                                    alertToPush.message = alertToPush.message.replace("80%", `${mem.toFixed(1)}%`);
-                                } else if (server.serverType === 'BATCH') {
-                                    alertToPush = JSON.parse(JSON.stringify(alertPool[9])); // Batch Error
-                                    serverStatus = 'Error'; // 배치 실패 시 명시적 에러 상태
-                                } else if (server.serverType === 'CACHE') {
-                                    // 캐시 지연은 별도 지표가 없으므로, CPU/MEM 약간 올리고 Info 경고
-                                    cpu = 60 + Math.random()*10;
-                                    // alertToPush = {type: 'Cache', severity: 'Info', message: '캐시 응답 지연 증가', keywords: ["cache", "info", "지연"]};
-                                }
-                                break;
-                        }
-                        if (alertToPush) {
-                            alertToPush.timestamp = currentTime.toISOString();
-                            currentServerAlerts.push(alertToPush);
-                        }
-                        // 장애 시나리오에 해당되면 상태를 더 높게 설정
-                        if (currentServerAlerts.some(al => al.severity === 'Critical')) serverStatus = 'Critical';
-                        else if (currentServerAlerts.some(al => al.severity === 'Error')) serverStatus = 'Error';
-                        else if (currentServerAlerts.some(al => al.severity === 'Warning')) serverStatus = 'Warning';
-
+                if (config.serverHostname === server.serverHostname && 
+                    hoursAgo >= config.endHourAgo && hoursAgo < config.startHourAgo) {
+                    
+                    if (config.forcedStats) {
+                        if(config.forcedStats.cpuUsage) cpu = Math.max(cpu, config.forcedStats.cpuUsage + Math.random()*5 - 2.5);
+                        if(config.forcedStats.memoryUsage) mem = Math.max(mem, config.forcedStats.memoryUsage + Math.random()*5 - 2.5);
+                        if(config.forcedStats.diskUsage) disk = Math.max(disk, config.forcedStats.diskUsage + Math.random()*3 - 1.5);
+                        if(config.forcedStats.networkTrafficOut) netOut = Math.max(netOut, config.forcedStats.networkTrafficOut);
+                        if(config.forcedStats.networkTrafficIn) netIn = Math.max(netIn, config.forcedStats.networkTrafficIn);
+                        if(config.forcedStats.status) serverStatus = config.forcedStats.status;
                     }
+                    if (config.alerts && Array.isArray(config.alerts)) {
+                        config.alerts.forEach(alertTemplate => {
+                            const alertToAdd = JSON.parse(JSON.stringify(alertTemplate));
+                            alertToAdd.timestamp = currentTime.toISOString();
+                            // 메시지 플레이스홀더 동적 치환 (예시)
+                            if(alertToAdd.message && alertToAdd.message.includes("90%")) alertToAdd.message = alertToAdd.message.replace("90%", `${cpu.toFixed(1)}%`);
+                            if(alertToAdd.message && alertToAdd.message.includes("75%")) alertToAdd.message = alertToAdd.message.replace("75%", `${cpu.toFixed(1)}%`);
+                            // ... 기타 플레이스홀더 처리 ...
+                            currentServerAlerts.push(alertToAdd);
+                        });
+                    }
+                    // 시나리오에 해당되면 serverStatus 우선 적용, 아니면 경고 기반
+                     if (serverStatus === 'Normal' && currentServerAlerts.some(al => al.severity === 'Critical')) serverStatus = 'Critical';
+                     else if (serverStatus === 'Normal' && currentServerAlerts.some(al => al.severity === 'Error')) serverStatus = 'Error';
+                     else if (serverStatus === 'Normal' && currentServerAlerts.some(al => al.severity === 'Warning')) serverStatus = 'Warning';
+                    break; 
                 }
             }
             
-            // 일반적인 확률 기반 경고 (장애 시나리오에 해당 안될 때 더 낮은 확률로)
-            if(currentServerAlerts.length === 0) {
-                if (cpu > 75 && Math.random() < 0.02) { // CPU Warning 확률 낮춤
-                    const alert = JSON.parse(JSON.stringify(alertPool[1]));
-                    alert.message = (alert.message || "").replace("75%", `${cpu.toFixed(1)}%`);
-                    alert.timestamp = currentTime.toISOString(); currentServerAlerts.push(alert);
-                }
-                if (mem > 80 && Math.random() < 0.015) { // Memory Warning 확률 낮춤
-                    const alert = JSON.parse(JSON.stringify(alertPool[3]));
-                    alert.message = (alert.message || "").replace("80%", `${mem.toFixed(1)}%`);
-                    alert.timestamp = currentTime.toISOString(); currentServerAlerts.push(alert);
-                }
-                if (disk > 85 && Math.random() < 0.02) { // Disk Warning 확률 낮춤
-                     const alert = JSON.parse(JSON.stringify(alertPool[5]));
-                     alert.timestamp = currentTime.toISOString(); currentServerAlerts.push(alert);
-                }
-                 if (server.serverHostname.includes('authsvc') && Math.random() < 0.005) { // 로그인 실패는 매우 드물게
-                     currentServerAlerts.push({...alertPool[8], timestamp: currentTime.toISOString()});
-                }
-            }
-
             cpu = Math.max(1, Math.min(99.9, parseFloat(cpu.toFixed(1))));
             mem = Math.max(1, Math.min(99.9, parseFloat(mem.toFixed(1))));
             disk = Math.max(1, Math.min(99.5, parseFloat(disk.toFixed(1))));
 
-            const finalAlerts = [];
+            const finalAlerts = []; /* ... (이전 답변의 finalAlerts 생성 로직과 동일) ... */
             const alertKeys = new Set();
             currentServerAlerts.forEach(al => { 
-               const messagePart = (al.message && typeof al.message === 'string') ? al.message.substring(0,15) : 'no_message_part'; // 키 생성 시 메시지 부분 길이 늘림
+               const messagePart = (al.message && typeof al.message === 'string') ? al.message.substring(0,15) : 'no_message_part';
                const key = `${al.type}-${al.severity}-${messagePart}`; 
                if (!alertKeys.has(key)) {
                    finalAlerts.push(al);
                    alertKeys.add(key);
                }
             });
-
+            
             // 최종 상태 결정
-            serverHighestSeverityScore = 0; // 루프마다 초기화
-            if (serverStatus === 'Normal') { // 시나리오에서 상태가 직접 지정되지 않은 경우만 경고 기반으로 재계산
+            serverHighestSeverityScore = 0; 
+            if (serverStatus === 'Normal') { 
                 finalAlerts.forEach(al => {
                     if (al.severity === 'Critical') serverHighestSeverityScore = Math.max(serverHighestSeverityScore, 4);
                     else if (al.severity === 'Error') serverHighestSeverityScore = Math.max(serverHighestSeverityScore, 3);
@@ -187,15 +196,17 @@ function getFixedDummyData() {
                 else if (serverHighestSeverityScore === 3) serverStatus = 'Error';
                 else if (serverHighestSeverityScore === 2) serverStatus = 'Warning';
                 else if (serverHighestSeverityScore === 1) serverStatus = 'Info';
-            } else { // 시나리오에서 상태가 이미 Critical/Error로 지정된 경우 해당 심각도 코드 반영
+            } else { 
                  if (serverStatus === 'Critical') serverHighestSeverityScore = 4;
                  else if (serverStatus === 'Error') serverHighestSeverityScore = 3;
+                 else if (serverStatus === 'Warning') serverHighestSeverityScore = 2; // 시나리오에서 Warning으로 설정될 수도 있음
+                 else if (serverStatus === 'Info') serverHighestSeverityScore = 1;
             }
 
             data.push({
                 serverHostname: server.serverHostname, ip: server.ip, serverType: server.serverType, location: server.location,
                 timestamp: currentTime.toISOString(),
-                stats: { cpuUsage: cpu, memoryUsage: mem, diskUsage: disk, networkTrafficIn: netIn, networkTrafficOut: netOut, processCount: proc },
+                stats: { cpuUsage: cpu, memoryUsage: mem, diskUsage: disk, networkTrafficIn: netIn, networkTrafficOut: netOut, processCount: procCnt },
                 status: serverStatus, alerts: finalAlerts
             });
         });
