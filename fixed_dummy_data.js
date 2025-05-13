@@ -61,81 +61,81 @@ function getFixedDummyData() {
             let highestSeverityScore = 0; // Normal:0, Info:1, Warning:2, Error:3, Critical:4
 
             // 경고 발생 로직 (시나리오 기반)
-            // 1. 특정 서버 집중 경고 (server-05, server-12)
-            if (server.serverHostname === 'server-05.opm.internal' && (currentTime.getHours() % 12 >= 8 && currentTime.getHours() % 12 <= 10)) { // 오전/오후 8-10시
-                const alert = JSON.parse(JSON.stringify(alertPool[0])); // CPU Critical
+            if (server.serverHostname === 'server-05.opm.internal' && (currentTime.getHours() % 12 >= 8 && currentTime.getHours() % 12 <= 10)) {
+                const alert = JSON.parse(JSON.stringify(alertPool[0])); 
                 alert.message = alert.message.replace("90%", `${(90 + Math.random()*9).toFixed(1)}%`);
                 alert.timestamp = currentTime.toISOString();
                 currentAlerts.push(alert);
             }
-            if (server.serverHostname === 'server-12.opm.internal' && server.serverType === 'DB' && diskUsage > 80) {
-                const alert = JSON.parse(JSON.stringify(alertPool[4])); // Disk Critical
+            if (server.serverHostname === 'server-12.opm.internal' && server.serverType === 'DB' && diskUsage > 80 && (currentTime.getHours() % 6 === 0 )) { // 특정 시간에만 디스크 경고 발생
+                const alert = JSON.parse(JSON.stringify(alertPool[4])); 
                 alert.message = alert.message.replace("95%", `${diskUsage.toFixed(1)}%`);
                 alert.timestamp = currentTime.toISOString();
                 currentAlerts.push(alert);
             }
 
-            // 2. 일반적인 지표 기반 경고
-            if (cpuUsage > 90) {
+            if (cpuUsage > 90 && Math.random() < 0.5) { // 50% 확률로 Critical
                 const alert = JSON.parse(JSON.stringify(alertPool[0]));
                 alert.message = alert.message.replace("90%", `${cpuUsage}%`);
                 alert.timestamp = currentTime.toISOString();
                 currentAlerts.push(alert);
-            } else if (cpuUsage > 75) {
-                 if(Math.random() < 0.3) { // 30% 확률로 Warning
-                    const alert = JSON.parse(JSON.stringify(alertPool[1]));
-                    alert.message = alert.message.replace("75%", `${cpuUsage}%`);
-                    alert.timestamp = currentTime.toISOString();
-                    currentAlerts.push(alert);
-                 }
-            }
-
-            if (memoryUsage > 90) {
-                const alert = JSON.parse(JSON.stringify(alertPool[2]));
-                alert.message = alert.message.replace("5%", `${(100-memoryUsage).toFixed(1)}%`);
+            } else if (cpuUsage > 75 && Math.random() < 0.3) { 
+                const alert = JSON.parse(JSON.stringify(alertPool[1]));
+                alert.message = alert.message.replace("75%", `${cpuUsage}%`);
                 alert.timestamp = currentTime.toISOString();
                 currentAlerts.push(alert);
-            } else if (memoryUsage > 80) {
-                if(Math.random() < 0.25) {
-                    const alert = JSON.parse(JSON.stringify(alertPool[3]));
-                    alert.message = alert.message.replace("80%", `${memoryUsage}%`);
-                    alert.timestamp = currentTime.toISOString();
-                    currentAlerts.push(alert);
-                }
+            }
+
+            if (memoryUsage > 90 && Math.random() < 0.4) { // 40% 확률로 Critical
+                const alert = JSON.parse(JSON.stringify(alertPool[2]));
+                alert.message = alert.message.replace("5% 미만", `${(100-memoryUsage).toFixed(1)}% 미만`);
+                alert.timestamp = currentTime.toISOString();
+                currentAlerts.push(alert);
+            } else if (memoryUsage > 80 && Math.random() < 0.25) {
+                const alert = JSON.parse(JSON.stringify(alertPool[3]));
+                alert.message = alert.message.replace("80%", `${memoryUsage}%`);
+                alert.timestamp = currentTime.toISOString();
+                currentAlerts.push(alert);
             }
             
-            // 3. 서버 타입별 특화 경고
-            if (server.serverType === 'WAS' && Math.random() < 0.03) { // WAS서버에서 가끔 앱에러
-                const alert = JSON.parse(JSON.stringify(alertPool[10])); // Application Error
+            if (server.serverType === 'WAS' && Math.random() < 0.03) {
+                const alert = JSON.parse(JSON.stringify(alertPool[10])); 
                 alert.timestamp = currentTime.toISOString();
                 currentAlerts.push(alert);
             }
-            if (server.serverType === 'DB' && Math.random() < 0.05) { // DB서버에서 가끔 슬로우쿼리
-                const alert = JSON.parse(JSON.stringify(alertPool[15])); // DB Slow Query
+            if (server.serverType === 'DB' && Math.random() < 0.05 && currentTime.getHours() > 20) { // 저녁시간 DB 슬로우쿼리
+                const alert = JSON.parse(JSON.stringify(alertPool[15])); 
                 alert.timestamp = currentTime.toISOString();
                 currentAlerts.push(alert);
             }
-            if (server.serverType === 'MONITORING' && Math.random() < 0.02) { // 모니터링 서버에서 보안 경고
-                const alert = JSON.parse(JSON.stringify(alertPool[12])); // Security Critical
+            if (server.serverType === 'MONITORING' && Math.random() < 0.02) {
+                const alert = JSON.parse(JSON.stringify(alertPool[12])); 
+                alert.timestamp = currentTime.toISOString();
+                currentAlerts.push(alert);
+            }
+            if (server.serverType === 'API' && (networkTrafficOut > 200 || networkTrafficIn > 150) && Math.random() < 0.1) {
+                const alert = JSON.parse(JSON.stringify(alertPool[7])); // 외부 네트워크 트래픽 급증
                 alert.timestamp = currentTime.toISOString();
                 currentAlerts.push(alert);
             }
 
-            // 중복 제거 (같은 타입, 같은 심각도 메시지는 하나만 남기도록 할 수 있으나, 여기서는 단순 추가)
-            // const uniqueAlerts = [];
-            // const alertKeys = new Set();
-            // currentAlerts.forEach(al => {
-            //    const key = `${al.type}-${al.severity}`;
-            //    if (!alertKeys.has(key)) {
-            //        uniqueAlerts.push(al);
-            //        alertKeys.add(key);
-            //    }
-            // });
-            // const finalAlerts = uniqueAlerts;
-            const finalAlerts = currentAlerts;
+
+            const finalAlerts = [];
+            const alertKeys = new Set();
+            currentAlerts.forEach(al => { // 같은 시간, 같은 서버에 동일 타입/심각도 경고 중복 제거 (메시지는 다를 수 있음)
+               const key = `${al.type}-${al.severity}`;
+               if (!alertKeys.has(key)) {
+                   finalAlerts.push(al);
+                   alertKeys.add(key);
+               } else { // 이미 같은 타입/심각도 경고가 있다면, 메시지만 업데이트 시도 (더 심각한 메시지로)
+                   const existingAlertIndex = finalAlerts.findIndex(fa => fa.type === al.type && fa.severity === al.severity);
+                   if (existingAlertIndex !== -1 && al.message.length > finalAlerts[existingAlertIndex].message.length) { // 간단한 로직: 더 긴 메시지로
+                       finalAlerts[existingAlertIndex] = al;
+                   }
+               }
+            });
 
 
-            // 상태 결정
             finalAlerts.forEach(al => {
                 if (al.severity === 'Critical') highestSeverityScore = Math.max(highestSeverityScore, 4);
                 else if (al.severity === 'Error') highestSeverityScore = Math.max(highestSeverityScore, 3);
@@ -164,8 +164,8 @@ function getFixedDummyData() {
                     networkTrafficOut: networkTrafficOut,
                     processCount: processCount,
                 },
-                status: currentStatus, // 해당 시간의 서버 상태
-                alerts: finalAlerts    // 해당 시간에 발생한 경고 목록
+                status: currentStatus,
+                alerts: finalAlerts 
             });
         });
         currentTime.setHours(currentTime.getHours() + 1);
