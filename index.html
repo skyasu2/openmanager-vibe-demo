@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>OpenManager 7.0 요약 데모</title>
-  <meta http-equiv="refresh" content="3;url=demo.html">
+  <!-- 자동 리다이렉션 메타 태그 제거 -->
   <style>
     body {
       margin: 0;
@@ -30,7 +30,7 @@
       color: #cccccc;
     }
     
-    /* 버튼 스타일 추가 */
+    /* 버튼 스타일 */
     .demo-button {
       background-color: #00bfff;
       color: #001f3f;
@@ -43,6 +43,7 @@
       cursor: pointer;
       transition: all 0.3s ease;
       text-decoration: none;
+      display: inline-block;
     }
     
     .demo-button:hover {
@@ -50,26 +51,58 @@
       transform: translateY(-2px);
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
+    
+    /* 로고 영역 */
+    .logo-area {
+      margin-bottom: 30px;
+    }
+    
+    .logo-area img {
+      width: 70px;
+      height: 70px;
+      background-color: white;
+      border-radius: 50%;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+    
+    /* 애니메이션 추가 */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    
+    .animated {
+      animation: pulse 2s infinite;
+    }
   </style>
 </head>
 <body>
+  <div class="logo-area">
+    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAxZjNmIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgY2xhc3M9ImZlYXRoZXIgZmVhdGhlci1zZXJ2ZXIiPjxyZWN0IHg9IjIiIHk9IjIiIHdpZHRoPSIyMCIgaGVpZ2h0PSI4IiByeD0iMiIgcnk9IjIiPjwvcmVjdD48cmVjdCB4PSIyIiB5PSIxNCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjgiIHJ4PSIyIiByeT0iMiI+PC9yZWN0PjxsaW5lIHg9IjYiIHkxPSI2IiB4Mj0iNi4wMSIgeTI9IjYiPjwvbGluZT48bGluZSB4PSI2IiB5MT0iMTgiIHgyPSI2LjAxIiB5Mj0iMTgiPjwvbGluZT48L3N2Zz4=" alt="OpenManager Logo">
+  </div>
+
   <h1>OpenManager 7.0 요약 모듈 데모</h1>
   <p>Cloud Native 환경을 위한 통합 모니터링 플랫폼을 체험해보세요.</p>
-  <p>3초 후 자동으로 데모 화면으로 이동합니다.</p>
+  <p>아래 버튼을 클릭하여 데모를 시작합니다.</p>
   
-  <!-- 데모 시작 버튼 추가 -->
-  <a href="demo.html" class="demo-button">데모 바로 시작</a>
+  <!-- 데모 시작 버튼 - 클래스 animated 추가 -->
+  <a href="demo.html" class="demo-button animated">데모 시작하기</a>
   
   <script>
-    // 버튼 클릭 시 페이지 이동 이벤트 추가
+    // 버튼 클릭 이벤트
     document.addEventListener('DOMContentLoaded', function() {
-      document.querySelector('.demo-button').addEventListener('click', function(e) {
-        // 기본 이벤트 방지 (이미 a 태그가 링크 기능을 제공하므로 불필요하지만 예시로 포함)
-        // e.preventDefault();
-        // window.location.href = 'demo.html';
-        
-        // 클릭 효과 추가
+      document.querySelector('.demo-button').addEventListener('click', function() {
         this.style.backgroundColor = '#0088cc';
+        
+        // 버튼에 로딩 텍스트 추가 (선택 사항)
+        this.textContent = '데모 로딩 중...';
+        
+        // 약간의 지연 후 페이지 이동 (선택 사항, 버튼 효과를 보기 위한 것)
+        // setTimeout(function() {
+        //   window.location.href = 'demo.html';
+        // }, 300);
       });
     });
   </script>
