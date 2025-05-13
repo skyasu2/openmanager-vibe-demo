@@ -1,7 +1,6 @@
 body {
   font-family: 'Noto Sans KR', sans-serif;
   margin: 0;
-  /* 하늘색 - 흰색 그라데이션 */
   background: linear-gradient(to bottom, #e0f3ff, #ffffff);
   color: #333;
   display: flex;
@@ -67,4 +66,22 @@ h2 {
 
 #top5-table tr:hover {
   background-color: #f9f9f9;
+}
+
+button {
+  background-color: #4caf50;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 1rem;
+  margin-top: 20px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+button:hover {
+  background-color: #3e8e41;
 }
