@@ -29,12 +29,49 @@
       line-height: 1.6;
       color: #cccccc;
     }
+    
+    /* 버튼 스타일 추가 */
+    .demo-button {
+      background-color: #00bfff;
+      color: #001f3f;
+      border: none;
+      border-radius: 4px;
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: bold;
+      margin-top: 24px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+    }
+    
+    .demo-button:hover {
+      background-color: #66d9ff;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
   </style>
 </head>
 <body>
   <h1>OpenManager 7.0 요약 모듈 데모</h1>
   <p>Cloud Native 환경을 위한 통합 모니터링 플랫폼을 체험해보세요.</p>
   <p>3초 후 자동으로 데모 화면으로 이동합니다.</p>
+  
+  <!-- 데모 시작 버튼 추가 -->
+  <a href="demo.html" class="demo-button">데모 바로 시작</a>
+  
+  <script>
+    // 버튼 클릭 시 페이지 이동 이벤트 추가
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelector('.demo-button').addEventListener('click', function(e) {
+        // 기본 이벤트 방지 (이미 a 태그가 링크 기능을 제공하므로 불필요하지만 예시로 포함)
+        // e.preventDefault();
+        // window.location.href = 'demo.html';
+        
+        // 클릭 효과 추가
+        this.style.backgroundColor = '#0088cc';
+      });
+    });
+  </script>
 </body>
 </html>
-
