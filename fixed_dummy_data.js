@@ -13,24 +13,21 @@ function getFixedDummyData() {
         API: ['gateway', 'authsvc', 'usersvc'],
         CACHE: ['redis', 'memcached']
     };
-    const serverTypes = Object.keys(rolesByType); // ['WEB', 'WAS', ...]
+    const serverTypes = Object.keys(rolesByType); 
     const locations = ['Seoul-IDC', 'Busan-IDC', 'US-West-Oregon', 'EU-Frankfurt', 'APAC-Singapore'];
 
-    // 30개 서버 생성 (역할과 환경을 좀 더 명확히 분배)
     for (let i = 0; i < 30; i++) {
-        const env = environments[i % environments.length]; // prod, stg, dev 순환
-        const serverType = serverTypes[Math.floor(i / environments.length) % serverTypes.length]; // 타입별로 환경별 서버 할당 시도
+        const env = environments[i % environments.length]; 
+        const serverType = serverTypes[Math.floor(i / environments.length) % serverTypes.length]; 
         const roleArray = rolesByType[serverType];
         const role = roleArray[i % roleArray.length];
-        const instanceNum = Math.floor(i / (environments.length * serverTypes.length)) + 1; // 같은 타입/환경/역할 내에서의 번호
+        const instanceNum = Math.floor(i / (environments.length * serverTypes.length)) + 1; 
         
-        // 예: prod-web-nginx-01.opm-cloud.com
-        // 예: stg-db-mysql-master-01.opm-cloud.com
         const hostname = `${env}-${serverType.toLowerCase()}-${role}-${String(instanceNum).padStart(2, '0')}.opm-cloud.com`;
         
         servers.push({
             serverHostname: hostname,
-            ip: `10.${i % 8}.${Math.floor(i / 8)}.${(i % 50) + 10}`, // IP 주소 패턴
+            ip: `10.${i % 8}.${Math.floor(i / 8)}.${(i % 50) + 10}`, 
             serverType: serverType,
             location: locations[i % locations.length]
         });
@@ -43,7 +40,7 @@ function getFixedDummyData() {
 
     let currentTime = new Date(startDate);
 
-    const alertPool = [ // 이전과 동일한 alertPool 사용
+    const alertPool = [ 
         { type: 'CPU', severity: 'Critical', message: "CPU 사용률 임계치(90%) 초과", keywords: ["cpu", "critical", "사용률", "초과"] },
         { type: 'CPU', severity: 'Warning', message: "CPU 부하 지속적 높음 (75% 이상)", keywords: ["cpu", "warning", "부하", "높음"] },
         { type: 'Memory', severity: 'Critical', message: "사용 가능 메모리 매우 부족 (5% 미만)", keywords: ["memory", "critical", "메모리", "부족"] },
@@ -62,18 +59,15 @@ function getFixedDummyData() {
         { type: 'Database', severity: 'Warning', message: "DB 슬로우 쿼리 다수 발생", keywords: ["database", "warning", "slow query", "슬로우쿼리"] }
     ];
 
-    // 특정 서버에 장애 시나리오를 명확히 주입하기 위한 설정
-    // 예: 3일 전 오후 2시 ~ 4시에 특정 서버들에 집중 장애 발생
-    const criticalDayOffset = 3; // 3일 전
-    const criticalHourStart = 14; // 오후 2시
-    const criticalHourEnd = 16;   // 오후 4시
+    const criticalDayOffset = 3; 
+    const criticalHourStart = 14; 
+    const criticalHourEnd = 16;   
 
     const problematicServerHostnames = [
-        servers[2].serverHostname, // 예: prod-db-mysql-master-01 (DB 장애)
-        servers[5].serverHostname, // 예: stg-was-node-01 (WAS 장애)
-        servers[10].serverHostname // 예: dev-api-gateway-01 (API 장애)
+        servers[2].serverHostname, 
+        servers[5].serverHostname, 
+        servers[10].serverHostname 
     ];
-
 
     while (currentTime <= endDate) {
         servers.forEach((server, serverIndex) => {
@@ -88,22 +82,21 @@ function getFixedDummyData() {
             let currentStatus = 'Normal';
             let highestSeverityScore = 0; 
 
-            // --- 의도적인 장애 주입 로직 ---
             const dateForCheck = new Date(currentTime);
-            const referenceEndDate = new Date(endDate); // endDate를 기준으로 비교
+            const referenceEndDate = new Date(endDate); 
             const isCriticalTime = 
-                (referenceEndDate.getDate() - dateForCheck.getDate() === criticalDayOffset) && // 3일 전인지 확인 (월이 바뀌는 경우 등 고려 필요 시 로직 복잡해짐)
+                ( (referenceEndDate.getTime() - dateForCheck.getTime()) / (1000 * 60 * 60 * 24) >= criticalDayOffset -1 && // 정확한 날짜 차이 계산
+                  (referenceEndDate.getTime() - dateForCheck.getTime()) / (1000 * 60 * 60 * 24) < criticalDayOffset ) &&
                 (dateForCheck.getHours() >= criticalHourStart && dateForCheck.getHours() < criticalHourEnd);
 
             if (problematicServerHostnames.includes(server.serverHostname) && isCriticalTime) {
-                // 이 서버들은 지정된 시간에 높은 부하와 Critical 경고 발생
                 if (server.serverType === 'DB') {
-                    cpuUsage = Math.random() * 10 + 85; // 85-95%
-                    memoryUsage = Math.random() * 5 + 90; // 90-95%
-                    const alert1 = JSON.parse(JSON.stringify(alertPool[14])); // DB 연결 풀 고갈
+                    cpuUsage = Math.random() * 10 + 85; 
+                    memoryUsage = Math.random() * 5 + 90; 
+                    const alert1 = JSON.parse(JSON.stringify(alertPool[14])); 
                     alert1.timestamp = currentTime.toISOString();
                     currentAlerts.push(alert1);
-                    if(Math.random() < 0.5){ // 추가로 디스크 문제도 발생 가능
+                    if(Math.random() < 0.5){ 
                          diskUsage = Math.random() * 5 + 90;
                          const alert2 = JSON.parse(JSON.stringify(alertPool[4])); 
                          alert2.message = alert2.message.replace("95%", `${diskUsage.toFixed(1)}%`);
@@ -111,59 +104,72 @@ function getFixedDummyData() {
                          currentAlerts.push(alert2);
                     }
                 } else if (server.serverType === 'WAS') {
-                    cpuUsage = Math.random() * 15 + 80; // 80-95%
-                    memoryUsage = Math.random() * 10 + 88; // 88-98%
-                    const alert1 = JSON.parse(JSON.stringify(alertPool[2])); // 메모리 Critical
+                    cpuUsage = Math.random() * 15 + 80; 
+                    memoryUsage = Math.random() * 10 + 88; 
+                    const alert1 = JSON.parse(JSON.stringify(alertPool[2])); 
                     alert1.message = alert1.message.replace("5% 미만", `${(100-memoryUsage).toFixed(1)}% 미만`);
                     alert1.timestamp = currentTime.toISOString();
                     currentAlerts.push(alert1);
-                    if(Math.random() < 0.6){ // 추가로 앱 에러 발생
+                    if(Math.random() < 0.6){ 
                         const alert2 = JSON.parse(JSON.stringify(alertPool[10]));
                         alert2.timestamp = currentTime.toISOString();
                         currentAlerts.push(alert2);
                     }
                 } else if (server.serverType === 'API') {
-                    cpuUsage = Math.random() * 5 + 90; // 90-95%
-                    networkTrafficOut += 300; // 트래픽 급증
+                    cpuUsage = Math.random() * 5 + 90; 
+                    networkTrafficOut += 300; 
                     networkTrafficIn += 150;
-                    const alert1 = JSON.parse(JSON.stringify(alertPool[0])); // CPU Critical
+                    const alert1 = JSON.parse(JSON.stringify(alertPool[0])); 
                     alert1.message = alert1.message.replace("90%", `${cpuUsage}%`);
                     alert1.timestamp = currentTime.toISOString();
                     currentAlerts.push(alert1);
-                    const alert2 = JSON.parse(JSON.stringify(alertPool[7])); // 네트워크 트래픽 급증 Info -> Warning/Error로 변경 가능
-                    alert2.severity = 'Error'; // 심각도 조정
+                    const alert2 = JSON.parse(JSON.stringify(alertPool[7])); 
+                    alert2.severity = 'Error'; 
                     alert2.timestamp = currentTime.toISOString();
                     currentAlerts.push(alert2);
                 }
-            } else { // 일반적인 상황에서의 경고 발생 (확률 기반)
-                if (cpuUsage > 90 && Math.random() < 0.15) { /* ... (이하 일반 경고 발생 로직은 이전과 유사하게 유지) ... */ }
-                else if (cpuUsage > 75 && Math.random() < 0.1) { /* ... */ }
-                if (memoryUsage > 90 && Math.random() < 0.1) { /* ... */ }
-                else if (memoryUsage > 80 && Math.random() < 0.08) { /* ... */ }
-                // ... (기타 Disk, Network, Process, Application, Security, Database 경고 발생 로직)
-                // 여기서는 간략화를 위해 몇 가지만 남기고, 필요시 이전 답변의 경고 로직을 참고하여 추가합니다.
+            } else { 
+                if (cpuUsage > 90 && Math.random() < 0.15) { 
+                    const alert = JSON.parse(JSON.stringify(alertPool[0]));
+                    alert.message = alert.message.replace("90%", `${cpuUsage.toFixed(1)}%`);
+                    alert.timestamp = currentTime.toISOString(); currentAlerts.push(alert);
+                } else if (cpuUsage > 75 && Math.random() < 0.1) { 
+                    const alert = JSON.parse(JSON.stringify(alertPool[1]));
+                    alert.message = alert.message.replace("75%", `${cpuUsage.toFixed(1)}%`);
+                    alert.timestamp = currentTime.toISOString(); currentAlerts.push(alert);
+                }
+                if (memoryUsage > 90 && Math.random() < 0.1) { 
+                    const alert = JSON.parse(JSON.stringify(alertPool[2]));
+                    alert.message = alert.message.replace("5% 미만", `${(100-memoryUsage).toFixed(1)}% 미만`);
+                    alert.timestamp = currentTime.toISOString(); currentAlerts.push(alert);
+                } else if (memoryUsage > 80 && Math.random() < 0.08) { 
+                    const alert = JSON.parse(JSON.stringify(alertPool[3]));
+                    alert.message = alert.message.replace("80%", `${memoryUsage.toFixed(1)}%`);
+                    alert.timestamp = currentTime.toISOString(); currentAlerts.push(alert);
+                }
                 if (server.serverType === 'WEB' && cpuUsage > 85 && Math.random() < 0.2) {
-                    const alert = JSON.parse(JSON.stringify(alertPool[8])); // 프로세스 응답 없음
+                    const alert = JSON.parse(JSON.stringify(alertPool[8])); 
                     alert.timestamp = currentTime.toISOString();
                     currentAlerts.push(alert);
                 }
             }
-            // --- 장애 주입 로직 끝 ---
 
-            // 값 범위 보정
             cpuUsage = Math.max(1, Math.min(99.9, parseFloat(cpuUsage.toFixed(1))));
             memoryUsage = Math.max(1, Math.min(99.9, parseFloat(memoryUsage.toFixed(1))));
             diskUsage = Math.max(1, Math.min(99.5, parseFloat(diskUsage.toFixed(1))));
 
-
-            // 중복 제거 및 상태 결정 로직 (이전과 동일)
             const finalAlerts = [];
             const alertKeys = new Set();
             currentAlerts.forEach(al => { 
-               const key = `${al.type}-${al.severity}-${al.message.substring(0,10)}`; // 메시지 일부 포함하여 완전 동일 메시지 중복 방지
+               const key = `${al.type}-${al.severity}-${al.message.substring(0,10)}`; 
                if (!alertKeys.has(key)) {
                    finalAlerts.push(al);
                    alertKeys.add(key);
+               } else { 
+                   const existingAlertIndex = finalAlerts.findIndex(fa => fa.type === al.type && fa.severity === al.severity);
+                   if (existingAlertIndex !== -1 && al.message.length > finalAlerts[existingAlertIndex].message.length) { 
+                       finalAlerts[existingAlertIndex] = al;
+                   }
                }
             });
 
