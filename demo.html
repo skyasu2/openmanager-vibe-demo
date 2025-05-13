@@ -66,11 +66,19 @@
         }
         
         /* 필터 섹션 */
-        .filters {
+        .filters-section {
             display: flex;
             margin-bottom: 20px;
             gap: 10px;
             flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            flex: 3;
         }
         
         .filter-select {
@@ -91,6 +99,34 @@
         
         .filter-btn:hover {
             background-color: #2980b9;
+        }
+        
+        /* 분석 도구 섹션 */
+        .analysis-tools {
+            display: flex;
+            gap: 10px;
+            flex: 2;
+        }
+        
+        .analysis-select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+            flex-grow: 1;
+        }
+        
+        .analysis-btn {
+            padding: 8px 15px;
+            background-color: #9b59b6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .analysis-btn:hover {
+            background-color: #8e44ad;
         }
         
         /* 서버 목록 섹션 */
@@ -151,6 +187,7 @@
             border-radius: 4px;
             font-size: 14px;
             cursor: pointer;
+            border: none;
         }
         
         .csv-btn:hover {
@@ -159,27 +196,22 @@
         
         /* 반응형 디자인 */
         @media (max-width: 768px) {
-            .card {
-                padding: 15px;
-            }
-            
-            th, td {
-                padding: 8px 10px;
-            }
-            
-            .navbar {
-                flex-direction: column;
-                gap: 10px;
-            }
-            
-            .nav-links {
-                width: 100%;
-                justify-content: center;
-            }
-            
-            .filters {
+            .filters-section {
                 flex-direction: column;
                 align-items: stretch;
+            }
+            
+            .filters, .analysis-tools {
+                width: 100%;
+            }
+            
+            .header {
+                flex-direction: column;
+            }
+            
+            .nav-menu {
+                margin-top: 10px;
+                justify-content: center;
             }
         }
     </style>
@@ -199,33 +231,49 @@
     <!-- 메인 컨텐츠 -->
     <div class="container">
         <h1>서버 상태 요약</h1>
-        <div class="timestamp">데이터 기준 시각: 2025. 5. 14. 오전 01:01:27</div>
+        <div class="timestamp">데이터 기준 시각: 2025. 5. 14. 오전 01:18:29</div>
         
-        <!-- 필터 섹션 -->
-        <div class="filters">
-            <select class="filter-select" id="time-filter">
-                <option value="1h">최근 1시간</option>
-                <option value="6h">최근 6시간</option>
-                <option value="24h" selected>최근 24시간</option>
-                <option value="7d">최근 7일</option>
-            </select>
+        <!-- 필터 및 분석 도구 섹션 -->
+        <div class="filters-section">
+            <!-- 필터 -->
+            <div class="filters">
+                <select class="filter-select" id="time-filter">
+                    <option value="1h">최근 1시간</option>
+                    <option value="6h">최근 6시간</option>
+                    <option value="24h" selected>최근 24시간</option>
+                    <option value="7d">최근 7일</option>
+                </select>
+                
+                <select class="filter-select" id="server-filter">
+                    <option value="all">모든 서버</option>
+                    <option value="db">DB 서버</option>
+                    <option value="app">App 서버</option>
+                    <option value="web">Web 서버</option>
+                </select>
+                
+                <select class="filter-select" id="alert-filter">
+                    <option value="all" selected>모든 경고</option>
+                    <option value="disk">디스크 경고</option>
+                    <option value="memory">메모리 누수</option>
+                    <option value="cpu">CPU 사용률</option>
+                    <option value="network">네트워크 지연</option>
+                </select>
+                
+                <button class="filter-btn" id="apply-filter">필터 적용</button>
+            </div>
             
-            <select class="filter-select" id="server-filter">
-                <option value="all">모든 서버</option>
-                <option value="db">DB 서버</option>
-                <option value="app">App 서버</option>
-                <option value="web">Web 서버</option>
-            </select>
-            
-            <select class="filter-select" id="alert-filter">
-                <option value="all" selected>모든 경고</option>
-                <option value="disk">디스크 경고</option>
-                <option value="memory">메모리 누수</option>
-                <option value="cpu">CPU 사용률</option>
-                <option value="network">네트워크 지연</option>
-            </select>
-            
-            <button class="filter-btn" id="apply-filter">필터 적용</button>
+            <!-- 자동 분석 도구 -->
+            <div class="analysis-tools">
+                <select class="analysis-select" id="analysis-type">
+                    <option value="" disabled selected>자동 분석 선택</option>
+                    <option value="cpu">CPU 사용률 분석</option>
+                    <option value="memory">메모리 사용량 분석</option>
+                    <option value="disk">디스크 사용량 분석</option>
+                    <option value="network">네트워크 상태 분석</option>
+                </select>
+                
+                <button class="analysis-btn" id="run-analysis">분석 실행</button>
+            </div>
         </div>
         
         <!-- 서버 목록 섹션 -->
@@ -451,6 +499,34 @@
             document.body.removeChild(link);
         }
         
+        // 분석 실행 함수
+        function runAnalysis() {
+            const analysisType = document.getElementById('analysis-type').value;
+            
+            if (!analysisType) {
+                alert('분석 유형을 선택해주세요.');
+                return;
+            }
+            
+            // 선택된 분석 유형에 따라 페이지 이동
+            switch (analysisType) {
+                case 'cpu':
+                    window.location.href = 'cpu-analysis.html';
+                    break;
+                case 'memory':
+                    window.location.href = 'memory-analysis.html';
+                    break;
+                case 'disk':
+                    window.location.href = 'disk-analysis.html';
+                    break;
+                case 'network':
+                    window.location.href = 'network-analysis.html';
+                    break;
+                default:
+                    alert('지원하지 않는 분석 유형입니다.');
+            }
+        }
+        
         // 이벤트 리스너 설정
         document.addEventListener('DOMContentLoaded', function() {
             // 페이지 로드 시 타임스탬프 업데이트
@@ -461,6 +537,9 @@
             
             // CSV 다운로드 버튼 클릭 이벤트
             document.getElementById('download-csv').addEventListener('click', downloadCSV);
+            
+            // 분석 실행 버튼 클릭 이벤트
+            document.getElementById('run-analysis').addEventListener('click', runAnalysis);
         });
     </script>
 </body>
