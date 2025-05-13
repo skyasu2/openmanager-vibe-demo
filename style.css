@@ -1,7 +1,8 @@
 body {
-  font-family: 'Noto Sans KR', sans-serif;  /* 폰트 변경 */
+  font-family: 'Noto Sans KR', sans-serif;
   margin: 0;
-  background: linear-gradient(to bottom, #f0f4f8, #e8e8e8);  /* 그라데이션 배경 */
+  /* 하늘색 - 흰색 그라데이션 */
+  background: linear-gradient(to bottom, #e0f3ff, #ffffff);
   color: #333;
   display: flex;
   justify-content: center;
@@ -13,7 +14,7 @@ body {
   background-color: white;
   padding: 40px;
   border-radius: 12px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);  /* 그림자 */
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
   width: 80%;
   max-width: 800px;
   margin: 40px auto;
@@ -65,5 +66,5 @@ h2 {
 }
 
 #top5-table tr:hover {
-  background-color: #f9f9f9;  /* 호버 효과 */
+  background-color: #f9f9f9;
 }
