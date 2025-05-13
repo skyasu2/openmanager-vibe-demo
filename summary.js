@@ -1,14 +1,40 @@
-fetch('mock_data.json')
-  .then(response => response.json())
-  .then(data => {
-    const count = {};
-    data.forEach(log => {
-      count[log.host] = (count[log.host] || 0) + 1;
+// summary.js
+// 요약: mock_data_100servers.json을 읽어서 서버별 경고 수를 집계하고 TOP5를 HTML로 렌더링
+
+async function loadAndSummarize() {
+  try {
+    const response = await fetch('mock_data_100servers.json');
+    const data = await response.json();
+
+    const summaryMap = {};
+    for (const entry of data) {
+      const { server, alert } = entry;
+      if (!summaryMap[server]) {
+        summaryMap[server] = { count: 0, reasons: new Set() };
+      }
+      summaryMap[server].count += 1;
+      summaryMap[server].reasons.add(alert);
+    }
+
+    const sorted = Object.entries(summaryMap)
+      .sort((a, b) => b[1].count - a[1].count)
+      .slice(0, 5);
+
+    const tableBody = document.getElementById('summary-body');
+    tableBody.innerHTML = '';
+    sorted.forEach(([server, info], index) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${index + 1}</td>
+        <td>${server}</td>
+        <td>${info.count}</td>
+        <td>${Array.from(info.reasons).join(', ')}</td>
+      `;
+      tableBody.appendChild(tr);
     });
-    const sorted = Object.entries(count).sort((a, b) => b[1] - a[1]);
-    const top5 = sorted.slice(0, 5);
-    document.getElementById('output').innerHTML =
-      '<h3>경고 상위 서버 TOP5</h3><ul>' +
-      top5.map(([host, cnt]) => `<li>${host}: ${cnt}건</li>`).join('') +
-      '</ul>';
-  });
+  } catch (err) {
+    console.error('데이터 로딩 실패:', err);
+  }
+}
+
+window.onload = loadAndSummarize;
