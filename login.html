@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head><title>로그인</title></head>
+<body>
+  <h2>비밀번호 입력</h2>
+  <input type="password" id="pw" placeholder="비밀번호 입력">
+  <button onclick="check()">로그인</button>
+  <script>
+    function check() {
+      const pw = document.getElementById("pw").value;
+      if (pw === "vibe2025") {
+        window.location.href = "demo.html";
+      } else {
+        alert("비밀번호가 틀렸습니다.");
+      }
+    }
+  </script>
+</body>
+</html>
