@@ -90,8 +90,7 @@
             <button class="filter-btn" id="apply-filter-btn" style="align-self: flex-end;">필터 적용</button>
         </div>
 
-        <h2>경고 상위 서버 TOP (기본 5개)</h2>
-        <table class="server-table">
+        <h2>경고 상위 서버 TOP (기본 10개)</h2> <table class="server-table">
             <thead>
                 <tr>
                     <th>서버 호스트네임</th>
@@ -124,6 +123,10 @@
         }
 
         function populateDropdown(selectElement, optionsArray, defaultOptionText) {
+            if (!selectElement) {
+                console.error(`Dropdown element for "${defaultOptionText}" not found.`);
+                return;
+            }
             selectElement.innerHTML = `<option value="all">${defaultOptionText}</option>`;
             optionsArray.forEach(optionValue => {
                 const option = document.createElement('option');
@@ -136,27 +139,38 @@
         function initializeFilters() {
             const serverTypeFilterEl = document.getElementById('server-type-filter');
             const locationFilterEl = document.getElementById('location-filter');
-            const alertFilterEl = document.getElementById('alert-filter'); // 추가 경고 타입용
+            const alertFilterEl = document.getElementById('alert-filter');
 
-            populateDropdown(serverTypeFilterEl, dataProcessor.getUniqueServerTypes(), '모든 서버 유형');
-            populateDropdown(locationFilterEl, dataProcessor.getUniqueLocations(), '모든 위치');
-            
-            // alert-filter에 고유 경고 타입(CPU, Memory 등) 추가
-            const uniqueAlertTypes = dataProcessor.getUniqueAlertTypes();
-            uniqueAlertTypes.forEach(alertType => {
-                 if (!['Critical', 'Error', 'Warning', 'Info'].includes(alertType)) { // 심각도와 중복되지 않게
-                    const option = document.createElement('option');
-                    option.value = alertType; // data_processor.applyFilters 에서 이 값을 사용
-                    option.textContent = `${alertType} 관련 경고`;
-                    alertFilterEl.appendChild(option);
-                 }
-            });
+            if(dataProcessor) {
+                populateDropdown(serverTypeFilterEl, dataProcessor.getUniqueServerTypes(), '모든 서버 유형');
+                populateDropdown(locationFilterEl, dataProcessor.getUniqueLocations(), '모든 위치');
+                
+                const uniqueAlertTypes = dataProcessor.getUniqueAlertTypes();
+                if (alertFilterEl && uniqueAlertTypes) {
+                    uniqueAlertTypes.forEach(alertType => {
+                        if (!['Critical', 'Error', 'Warning', 'Info'].includes(alertType)) {
+                            const option = document.createElement('option');
+                            option.value = alertType;
+                            option.textContent = `${alertType} 관련 경고`;
+                            alertFilterEl.appendChild(option);
+                        }
+                    });
+                }
+            } else {
+                console.error("DataProcessor is not initialized. Cannot populate filters.");
+            }
         }
 
         function applyAndRenderFilters() {
             showLoading();
-            setTimeout(() => { // 비동기 처리 및 UI 업데이트 시간 확보
+            setTimeout(() => {
                 try {
+                    if (!dataProcessor) {
+                        console.error("DataProcessor is not available for filtering.");
+                        alert("데이터 처리 모듈이 준비되지 않았습니다.");
+                        hideLoading();
+                        return;
+                    }
                     const timeRange = document.getElementById('time-filter').value;
                     const serverType = document.getElementById('server-type-filter').value;
                     const alertValue = document.getElementById('alert-filter').value;
@@ -165,7 +179,7 @@
                     const filteredData = dataProcessor.applyFilters(parseInt(timeRange), serverType, alertValue, location);
                     const topServersSummary = dataProcessor.getAlertSummaryByServer(filteredData);
                     
-                    updateServerTable(topServersSummary.slice(0, 10)); // 상위 10개 또는 전체 표시 가능
+                    updateServerTable(topServersSummary.slice(0, 10));
                     updateTimestamp();
                 } catch (error) {
                     console.error('필터 적용 및 렌더링 중 오류 발생:', error);
@@ -178,12 +192,16 @@
 
         function updateServerTable(serversSummary) {
             const tableBody = document.getElementById('server-list-tbody');
+            if (!tableBody) {
+                console.error("Table body 'server-list-tbody' not found.");
+                return;
+            }
             tableBody.innerHTML = '';
 
             if (!serversSummary || serversSummary.length === 0) {
                 const row = tableBody.insertRow();
                 const cell = row.insertCell();
-                cell.colSpan = 6; // 컬럼 수에 맞게 조정
+                cell.colSpan = 6;
                 cell.textContent = '조건에 맞는 서버 데이터가 없습니다.';
                 cell.style.textAlign = 'center';
                 cell.style.padding = '20px';
@@ -193,34 +211,34 @@
             serversSummary.forEach(summary => {
                 const row = tableBody.insertRow();
                 let icon = '';
-                let statusColor = '';
+                let statusColor = 'inherit'; // 기본값
 
-                if (summary.highestSeverityCode === 4) { icon = '🔴'; statusColor = 'crimson'; } // Critical
-                else if (summary.highestSeverityCode === 3) { icon = '🟠'; statusColor = 'darkorange'; } // Error
-                else if (summary.highestSeverityCode === 2) { icon = '🟡'; statusColor = 'gold'; } // Warning
-                else if (summary.highestSeverityCode === 1) { icon = '🔵'; statusColor = 'royalblue'; } // Info
-                else { icon = '🟢'; statusColor = 'green'; } // Normal
+                if (summary.highestSeverityCode === 4) { icon = '🔴'; statusColor = 'crimson'; }
+                else if (summary.highestSeverityCode === 3) { icon = '🟠'; statusColor = 'darkorange'; }
+                else if (summary.highestSeverityCode === 2) { icon = '🟡'; statusColor = 'gold'; }
+                else if (summary.highestSeverityCode === 1) { icon = '🔵'; statusColor = 'royalblue'; }
+                else if (summary.lastStatus === 'Normal') { icon = '🟢'; statusColor = 'green'; }
 
-                row.insertCell().innerHTML = `<span class="alert-icon" title="${summary.lastStatus}">${icon}</span> ${summary.name}`;
-                row.insertCell().textContent = summary.type;
-                row.insertCell().textContent = summary.location;
+
+                row.insertCell().innerHTML = `<span class="alert-icon" title="${summary.lastStatus || 'N/A'}">${icon}</span> ${summary.name || 'N/A'}`;
+                row.insertCell().textContent = summary.type || 'N/A';
+                row.insertCell().textContent = summary.location || 'N/A';
                 
-                const alertCountsText = `C:${summary.criticalCount}/E:${summary.errorCount}/W:${summary.warningCount}`;
+                const alertCountsText = `C:${summary.criticalCount || 0}/E:${summary.errorCount || 0}/W:${summary.warningCount || 0}`;
                 const countsCell = row.insertCell();
                 countsCell.textContent = alertCountsText;
                 if (summary.criticalCount > 0) countsCell.style.color = 'crimson';
                 else if (summary.errorCount > 0) countsCell.style.color = 'darkorange';
-                else if (summary.warningCount > 0) countsCell.style.color = 'gold';
-
+                else if (summary.warningCount > 0) countsCell.style.color = 'gold'; // 오타 수정 (gold)
 
                 const issueCell = row.insertCell();
-                issueCell.textContent = summary.mainIssueMessage;
-                if(summary.distinctAlertMessages.size > 0){
+                issueCell.textContent = summary.mainIssueMessage || 'N/A';
+                if(summary.distinctAlertMessages && summary.distinctAlertMessages.size > 0){
                     issueCell.title = `발생 메시지: ${Array.from(summary.distinctAlertMessages).join(' | ')}`;
                 }
 
                 const statusCell = row.insertCell();
-                statusCell.textContent = summary.lastStatus;
+                statusCell.textContent = summary.lastStatus || 'N/A';
                 statusCell.style.color = statusColor;
                 statusCell.style.fontWeight = 'bold';
             });
@@ -229,20 +247,28 @@
         function updateTimestamp() {
             const timestampEl = document.getElementById('timestamp');
             if (timestampEl) {
-                const now = new Date(); // 실제 데이터의 마지막 시간으로 하는 것이 더 정확할 수 있음
-                const dataEndTime = allServerData.length > 0 ? new Date(Math.max(...allServerData.map(d => new Date(d.timestamp).getTime()))) : now;
+                const now = new Date();
+                const dataEndTime = allServerData && allServerData.length > 0 ? new Date(Math.max(...allServerData.map(d => new Date(d.timestamp).getTime()))) : now;
                 timestampEl.textContent = `데이터 기준 시각: ${dataEndTime.toLocaleString('ko-KR', { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}`;
             }
         }
 
         function setupEventListeners() {
-            document.getElementById('apply-filter-btn').addEventListener('click', applyAndRenderFilters);
-            document.getElementById('download-csv-btn').addEventListener('click', downloadSummaryCSV);
+            const applyBtn = document.getElementById('apply-filter-btn');
+            if (applyBtn) applyBtn.addEventListener('click', applyAndRenderFilters);
+            
+            const csvBtn = document.getElementById('download-csv-btn');
+            if (csvBtn) csvBtn.addEventListener('click', downloadSummaryCSV);
         }
 
         function downloadSummaryCSV() {
             showLoading();
             try {
+                if (!dataProcessor) {
+                    alert("데이터가 로드되지 않아 CSV를 다운로드할 수 없습니다.");
+                    hideLoading();
+                    return;
+                }
                 const timeRange = document.getElementById('time-filter').value;
                 const serverType = document.getElementById('server-type-filter').value;
                 const alertValue = document.getElementById('alert-filter').value;
@@ -253,7 +279,7 @@
 
                 let csvContent = "서버 호스트네임,서버 유형,위치,Critical,Error,Warning,Info,주요 경고 내용,최근 상태\n";
                 serversForCsv.forEach(s => {
-                    csvContent += `"${s.name}","${s.type}","${s.location}",${s.criticalCount},${s.errorCount},${s.warningCount},${s.infoCount},"${(s.mainIssueMessage || '').replace(/"/g, '""')}","${s.lastStatus}"\n`;
+                    csvContent += `"${s.name || ''}","${s.type || ''}","${s.location || ''}",${s.criticalCount || 0},${s.errorCount || 0},${s.warningCount || 0},${s.infoCount || 0},"${(s.mainIssueMessage || '').replace(/"/g, '""')}","${s.lastStatus || ''}"\n`;
                 });
 
                 const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -273,11 +299,11 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            showLoading();
+            showLoading(); // DOM 로드 시작 시 로딩 표시
             try {
                 if (typeof getFixedDummyData !== 'function') {
                     console.error("getFixedDummyData is not defined! fixed_dummy_data.js를 확인하세요.");
-                    alert("필수 데이터 파일을 로드할 수 없습니다.");
+                    alert("필수 데이터 파일을 로드할 수 없습니다: getFixedDummyData");
                     hideLoading();
                     return;
                 }
@@ -290,21 +316,27 @@
                      return;
                 }
                 
+                if (typeof ServerDataProcessor !== 'function') { // ServerDataProcessor 정의 확인
+                    console.error("ServerDataProcessor is not defined! data_processor.js를 확인하세요.");
+                    alert("필수 데이터 처리 모듈을 로드할 수 없습니다: ServerDataProcessor");
+                    hideLoading();
+                    return;
+                }
                 dataProcessor = new ServerDataProcessor(allServerData);
+                console.log('DataProcessor 초기화 완료.');
                 
-                initializeFilters(); // 필터 옵션 채우기
-                applyAndRenderFilters(); // 초기 데이터 로드 및 테이블 렌더링
+                initializeFilters();
+                applyAndRenderFilters(); // 이 함수 내부의 finally에서 hideLoading() 호출
                 setupEventListeners();
 
             } catch (error) {
                 console.error('페이지 초기화 중 심각한 오류 발생:', error);
                 alert('페이지를 초기화하는 중 심각한 오류가 발생했습니다. 콘솔을 확인해주세요.');
-            } finally {
-                 // DOMContentLoaded 내의 로직이므로, 최종적으로 hideLoading은 applyAndRenderFilters에서 호출됨
-                 // 만약 applyAndRenderFilters 호출 전에 에러나면 여기서 hide.
-                 // 하지만 applyAndRenderFilters가 거의 바로 호출되므로 중복될 수 있음.
-                 // 초기 로딩은 applyAndRenderFilters 내부의 finally에서 제어.
+                hideLoading(); // 예외 발생 시 확실하게 로딩 숨김
             }
+            // applyAndRenderFilters 함수가 비동기(setTimeout)이므로,
+            // 여기서 hideLoading()을 호출하면 테이블이 그려지기 전에 로딩이 사라질 수 있습니다.
+            // applyAndRenderFilters 내부의 finally에서 제어하는 것이 더 적절합니다.
         });
     </script>
 </body>
