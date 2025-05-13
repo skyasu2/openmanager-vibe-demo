@@ -1,19 +1,18 @@
 <!DOCTYPE html>
 <html>
-<head><title>로그인</title></head>
+<head>
+  <meta charset="UTF-8">
+  <title>OpenManager 데모</title>
+  <meta http-equiv="refresh" content="2;url=demo.html">
+  <style>
+    body { font-family: sans-serif; text-align: center; padding-top: 80px; background: #f6f8fa; }
+    img.logo { height: 80px; margin-bottom: 20px; }
+    p { color: #555; font-size: 18px; }
+  </style>
+</head>
 <body>
-  <h2>비밀번호 입력</h2>
-  <input type="password" id="pw" placeholder="비밀번호 입력">
-  <button onclick="check()">로그인</button>
-  <script>
-    function check() {
-      const pw = document.getElementById("pw").value;
-      if (pw === "vibe2025") {
-        window.location.href = "demo.html";
-      } else {
-        alert("비밀번호가 틀렸습니다.");
-      }
-    }
-  </script>
+  <img src="https://www.in-soft.co.kr/wp-content/uploads/2023/03/logo.svg" alt="INSOFT 로고" class="logo">
+  <h2>OpenManager 요약 모듈 데모</h2>
+  <p>데모 페이지로 이동 중입니다...</p>
 </body>
 </html>
