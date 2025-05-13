@@ -3,47 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>간편 데모 시작</title>
+    <title>OpenManager 7.0 데모 시작</title>
     <style>
         body {
             font-family: sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-color: #f4f4f4;
             margin: 0;
+            background-color: #f4f4f4;
+            color: #333;
         }
         .container {
-            background-color: #fff;
+            max-width: 960px;
+            margin: 50px auto;
             padding: 30px;
+            background-color: #fff;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
+        h1 {
+            color: #007bff;
+        }
+        p {
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .button-container {
+            margin-top: 30px;
+        }
         button {
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #007bff;
+            padding: 15px 30px;
+            font-size: 18px;
+            background-color: #28a745;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
         }
         button:hover {
-            background-color: #0056b3;
+            background-color: #1e7e34;
+        }
+        .logo {
+            max-width: 150px;
+            margin-bottom: 20px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>데모 시작</h1>
-        <button onclick="goToDemo()">데모 페이지로 이동</button>
+        <img src="i_N_soft_logo.png" alt="i_N soft 로고" class="logo">
+        <h1>OpenManager 7.0</h1>
+        <p>Cloud Native 전환으로 복잡해진 환경에서 표준화된 신호 수집 및 통합 모니터링 플랫폼을 제공하여, 장애로 인한 손실을 최소화하고 비즈니스 성공을 촉진합니다. 이를 통해 운영 효율성을 극대화하고, 빠르게 변화하는 시장 요구에 신속히 대응할 수 있습니다.</p>
+        <div class="button-container">
+            <button onclick="goToDemo()">데모 시작</button>
+        </div>
     </div>
 
     <script>
         function goToDemo() {
-            window.location.href = '/demo'; // 여기에 실제 데모 페이지 URL을 입력하세요.
+            window.location.href = '/demo'; // 실제 데모 페이지 URL을 여기에 입력하세요.
         }
     </script>
 </body>
