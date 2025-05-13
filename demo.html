@@ -5,28 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OpenManager 7.0 - 서버 상태 요약</title>
     <style>
+        /* 전체 스타일 */
         body {
             font-family: 'Malgun Gothic', 'Segoe UI', sans-serif;
-            background-color: #e6f0f9;
             margin: 0;
-            padding: 20px;
+            padding: 0;
             color: #333;
+            background-color: #f5f7fa;
         }
         
-        .card {
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            padding: 30px;
-            max-width: 900px;
+        /* 헤더 네비게이션 */
+        .header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .nav-menu {
+            display: flex;
+        }
+        
+        .nav-item {
+            padding: 8px 15px;
+            margin-left: 5px;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        
+        .nav-item.active {
+            background-color: #3498db;
+        }
+        
+        /* 메인 컨텐츠 */
+        .container {
+            max-width: 1200px;
             margin: 0 auto;
+            padding: 20px;
         }
         
         h1 {
             text-align: center;
             color: #2c3e50;
             margin-bottom: 10px;
-            font-weight: 600;
         }
         
         .timestamp {
@@ -36,35 +65,95 @@
             font-size: 14px;
         }
         
+        /* 필터 섹션 */
+        .filters-section {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+        }
+        
+        .filter-btn {
+            padding: 8px 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .filter-btn:hover {
+            background-color: #2980b9;
+        }
+        
+        /* 자동 분석 섹션 */
+        .auto-analysis {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .analysis-btn {
+            padding: 8px 15px;
+            background-color: #9b59b6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
+        .analysis-btn i {
+            margin-right: 5px;
+        }
+        
+        .analysis-btn:hover {
+            background-color: #8e44ad;
+        }
+        
+        /* 서버 목록 섹션 */
         h2 {
             border-bottom: 1px solid #eee;
             padding-bottom: 10px;
             margin-top: 30px;
             margin-bottom: 20px;
-            font-weight: 600;
-            color: #34495e;
+            font-size: 18px;
+            color: #2c3e50;
         }
         
-        table {
+        .server-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
         
-        th {
-            background-color: #f8f9fa;
-            padding: 12px 15px;
+        .server-table th {
             text-align: left;
-            font-weight: 600;
-            color: #495057;
-        }
-        
-        td {
             padding: 12px 15px;
-            border-top: 1px solid #eee;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #ddd;
         }
         
-        tr:hover {
+        .server-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .server-table tr:hover {
             background-color: #f5f5f5;
         }
         
@@ -73,155 +162,194 @@
             margin-right: 5px;
         }
         
-        .download-btn {
-            background-color: #5cb85c;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            display: inline-block;
-            text-decoration: none;
-            transition: background-color 0.3s;
-        }
-        
-        .download-btn:hover {
-            background-color: #4cae4c;
-        }
-        
         .error-count {
             color: #e74c3c;
-            font-weight: 600;
+            font-weight: bold;
         }
         
         .warning-count {
             color: #f39c12;
         }
         
-        /* 추가: 상단 네비게이션 바 스타일 */
-        .navbar {
-            background-color: #2c3e50;
+        /* 다운로드 버튼 */
+        .csv-btn {
+            margin-top: 20px;
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #5cb85c;
             color: white;
-            padding: 15px 20px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .csv-btn:hover {
+            background-color: #4cae4c;
+        }
+        
+        /* 분석 모달 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            overflow: auto;
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 800px;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-radius: 10px 10px 0 0;
-            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
         }
         
-        .logo {
+        .modal-title {
+            font-size: 20px;
             font-weight: bold;
-            font-size: 18px;
+            color: #2c3e50;
         }
         
-        .nav-links {
-            display: flex;
+        .close-btn {
+            font-size: 24px;
+            color: #7f8c8d;
+            cursor: pointer;
+            background: none;
+            border: none;
         }
         
-        .nav-links a {
-            color: white;
-            text-decoration: none;
-            margin-left: 20px;
-            padding: 5px 10px;
+        .close-btn:hover {
+            color: #2c3e50;
+        }
+        
+        .analysis-chart {
+            width: 100%;
+            height: 300px;
+            margin: 20px 0;
+            background-color: #f9f9f9;
             border-radius: 4px;
-            transition: background-color 0.3s;
-        }
-        
-        .nav-links a:hover {
-            background-color: #34495e;
-        }
-        
-        .nav-links a.active {
-            background-color: #3498db;
-        }
-        
-        /* 추가: 필터링 옵션 */
-        .filter-options {
-            margin-bottom: 20px;
             display: flex;
+            justify-content: center;
             align-items: center;
-            gap: 10px;
+            border: 1px dashed #ddd;
         }
         
-        .filter-options select {
-            padding: 8px;
+        .analysis-details {
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+        
+        .recommendation {
+            background-color: #e8f4f8;
+            padding: 15px;
             border-radius: 4px;
-            border: 1px solid #ddd;
+            margin-top: 20px;
+            border-left: 4px solid #3498db;
         }
         
         /* 반응형 디자인 */
         @media (max-width: 768px) {
-            .card {
-                padding: 15px;
-            }
-            
-            th, td {
-                padding: 8px 10px;
-            }
-            
-            .navbar {
+            .filters-section {
                 flex-direction: column;
-                gap: 10px;
             }
             
-            .nav-links {
-                width: 100%;
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .nav-menu {
+                margin-top: 10px;
                 justify-content: center;
-            }
-            
-            .filter-options {
-                flex-direction: column;
-                align-items: stretch;
             }
         }
     </style>
 </head>
 <body>
-    <div class="card">
-        <div class="navbar">
-            <div class="logo">OpenManager 7.0</div>
-            <div class="nav-links">
-                <a href="#" class="active">대시보드</a>
-                <a href="#">서버 목록</a>
-                <a href="#">경고 로그</a>
-                <a href="#">설정</a>
+    <!-- 헤더 네비게이션 -->
+    <div class="header">
+        <div class="logo">OpenManager 7.0</div>
+        <div class="nav-menu">
+            <a href="#" class="nav-item active">대시보드</a>
+            <a href="#" class="nav-item">서버 목록</a>
+            <a href="#" class="nav-item">경고 로그</a>
+            <a href="#" class="nav-item">설정</a>
+        </div>
+    </div>
+    
+    <!-- 메인 컨텐츠 -->
+    <div class="container">
+        <h1>서버 상태 요약</h1>
+        <div class="timestamp">데이터 기준 시각: 2025. 5. 14. 오전 01:01:27</div>
+        
+        <!-- 필터 및 자동 분석 섹션 -->
+        <div class="filters-section">
+            <!-- 필터 -->
+            <div class="filters">
+                <select class="filter-select" id="time-filter">
+                    <option value="1h">최근 1시간</option>
+                    <option value="6h">최근 6시간</option>
+                    <option value="24h">최근 24시간</option>
+                    <option value="7d">최근 7일</option>
+                </select>
+                
+                <select class="filter-select" id="server-filter">
+                    <option value="all">모든 서버</option>
+                    <option value="db">DB 서버</option>
+                    <option value="app">App 서버</option>
+                    <option value="web">Web 서버</option>
+                </select>
+                
+                <select class="filter-select" id="alert-filter">
+                    <option value="all">모든 경고</option>
+                    <option value="disk">디스크 경고</option>
+                    <option value="memory">메모리 누수</option>
+                    <option value="cpu">CPU 사용률</option>
+                    <option value="network">네트워크 지연</option>
+                </select>
+                
+                <button class="filter-btn" id="apply-filter">필터 적용</button>
+            </div>
+            
+            <!-- 자동 분석 버튼 -->
+            <div class="auto-analysis">
+                <button class="analysis-btn" data-type="cpu">
+                    <i>📊</i> CPU 자동 분석
+                </button>
+                <button class="analysis-btn" data-type="memory">
+                    <i>📈</i> 메모리 자동 분석
+                </button>
+                <button class="analysis-btn" data-type="disk">
+                    <i>💾</i> 디스크 자동 분석
+                </button>
             </div>
         </div>
-
-        <h1>서버 상태 요약</h1>
-        <div class="timestamp">데이터 기준 시각: 2025. 5. 14. 오전 12:17:18</div>
         
-        <div class="filter-options">
-            <select id="timeFilter">
-                <option value="1h">최근 1시간</option>
-                <option value="6h">최근 6시간</option>
-                <option value="24h" selected>최근 24시간</option>
-                <option value="7d">최근 7일</option>
-            </select>
-            
-            <select id="serverTypeFilter">
-                <option value="all" selected>모든 서버</option>
-                <option value="db">DB 서버</option>
-                <option value="app">앱 서버</option>
-                <option value="web">웹 서버</option>
-            </select>
-            
-            <select id="alertTypeFilter">
-                <option value="all" selected>모든 경고</option>
-                <option value="disk">디스크</option>
-                <option value="memory">메모리</option>
-                <option value="cpu">CPU</option>
-                <option value="network">네트워크</option>
-            </select>
-            
-            <button onclick="applyFilters()" style="padding: 8px 15px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">필터 적용</button>
-        </div>
-        
+        <!-- 서버 목록 섹션 -->
         <h2>경고 상위 서버 TOP5</h2>
-        <table>
+        <table class="server-table">
             <thead>
                 <tr>
                     <th>서버</th>
@@ -229,7 +357,7 @@
                     <th>경고 내용</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="server-list">
                 <tr>
                     <td><span class="alert-icon">⚠</span> db01</td>
                     <td class="error-count">7건</td>
@@ -258,76 +386,43 @@
             </tbody>
         </table>
         
-        <button class="download-btn" onclick="downloadCSV()">CSV 다운로드</button>
+        <!-- 다운로드 버튼 -->
+        <button class="csv-btn" id="download-csv">CSV 다운로드</button>
     </div>
-
+    
+    <!-- 분석 모달 -->
+    <div class="modal" id="analysis-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modal-title">CPU 사용률 자동 분석</div>
+                <button class="close-btn">&times;</button>
+            </div>
+            
+            <div class="analysis-chart">
+                [여기에 차트/그래프가 표시됩니다]
+            </div>
+            
+            <div class="analysis-details">
+                <h3>분석 결과</h3>
+                <p id="analysis-text">
+                    최근 24시간 동안 CPU 사용률 관련 경고가 총 15건 발생했습니다. 특히 <strong>web01</strong> 서버에서 가장 많은 4건의 경고가 발생했습니다.
+                    전체 경고 중 CPU 사용률 관련 경고는 약 23%를 차지하고 있으며, 주로 오전 시간대(9시~12시)에 집중적으로 발생했습니다.
+                </p>
+                
+                <div class="recommendation">
+                    <h4>권장 조치</h4>
+                    <p id="recommendation-text">
+                        1. web01 서버의 워크로드 분산을 고려하세요.<br>
+                        2. 오전 시간대 서비스 요청 패턴을 분석하세요.<br>
+                        3. CPU 사용률이 80% 이상일 때 자동 스케일링 규칙 설정을 고려하세요.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <script>
-        // 서버 데이터 (실제 환경에서는 API로 가져옴)
-        const allServerData = [
-            { 
-                name: "db01", 
-                type: "db",
-                alertCount: 7, 
-                mainIssue: "디스크 경고", 
-                alertType: "disk",
-                hasHighAlert: true
-            },
-            { 
-                name: "app01", 
-                type: "app",
-                alertCount: 6, 
-                mainIssue: "메모리 누수", 
-                alertType: "memory",
-                hasHighAlert: true
-            },
-            { 
-                name: "web01", 
-                type: "web",
-                alertCount: 4, 
-                mainIssue: "CPU 사용률", 
-                alertType: "cpu",
-                hasHighAlert: false
-            },
-            { 
-                name: "web02", 
-                type: "web",
-                alertCount: 3, 
-                mainIssue: "네트워크 지연", 
-                alertType: "network",
-                hasHighAlert: false
-            },
-            { 
-                name: "db02", 
-                type: "db",
-                alertCount: 2, 
-                mainIssue: "접속 오류", 
-                alertType: "other",
-                hasHighAlert: false
-            },
-            { 
-                name: "app02", 
-                type: "app",
-                alertCount: 2, 
-                mainIssue: "메모리 사용량", 
-                alertType: "memory",
-                hasHighAlert: false
-            },
-            { 
-                name: "web03", 
-                type: "web",
-                alertCount: 1, 
-                mainIssue: "응답 지연", 
-                alertType: "network",
-                hasHighAlert: false
-            }
-        ];
-        
-        // 페이지 로드 시 타임스탬프 업데이트
-        document.addEventListener('DOMContentLoaded', function() {
-            updateTimestamp();
-        });
-        
-        // 현재 시간으로 타임스탬프 업데이트
+        // 현재 날짜/시간으로 타임스탬프 업데이트
         function updateTimestamp() {
             const now = new Date();
             const options = { 
@@ -343,61 +438,76 @@
             document.querySelector('.timestamp').textContent = `데이터 기준 시각: ${formattedDate}`;
         }
         
-        // 필터 적용
+        // 서버 데이터 (실제로는 mock_data_100servers.json에서 불러옴)
+        const serverData = [
+            { 
+                name: "db01", 
+                type: "db",
+                count: 7, 
+                mainIssue: "디스크 경고", 
+                alertType: "disk",
+                isHighPriority: true
+            },
+            { 
+                name: "app01", 
+                type: "app",
+                count: 6, 
+                mainIssue: "메모리 누수", 
+                alertType: "memory",
+                isHighPriority: true
+            },
+            { 
+                name: "web01", 
+                type: "web",
+                count: 4, 
+                mainIssue: "CPU 사용률", 
+                alertType: "cpu",
+                isHighPriority: false
+            },
+            { 
+                name: "web02", 
+                type: "web",
+                count: 3, 
+                mainIssue: "네트워크 지연", 
+                alertType: "network",
+                isHighPriority: false
+            },
+            { 
+                name: "db02", 
+                type: "db",
+                count: 2, 
+                mainIssue: "접속 오류", 
+                alertType: "connection",
+                isHighPriority: false
+            }
+        ];
+        
+        // 필터 적용 함수
         function applyFilters() {
-            const timeFilter = document.getElementById('timeFilter').value;
-            const serverTypeFilter = document.getElementById('serverTypeFilter').value;
-            const alertTypeFilter = document.getElementById('alertTypeFilter').value;
+            const timeFilter = document.getElementById('time-filter').value;
+            const serverFilter = document.getElementById('server-filter').value;
+            const alertFilter = document.getElementById('alert-filter').value;
             
-            // 필터링 (실제 구현에서는 여기서 필터링 로직 적용)
-            let filteredData = [...allServerData];
+            console.log(`필터 적용: 시간=${timeFilter}, 서버=${serverFilter}, 경고=${alertFilter}`);
             
-            // 서버 타입 필터링
-            if (serverTypeFilter !== 'all') {
-                filteredData = filteredData.filter(server => server.type === serverTypeFilter);
-            }
-            
-            // 경고 타입 필터링
-            if (alertTypeFilter !== 'all') {
-                filteredData = filteredData.filter(server => server.alertType === alertTypeFilter);
-            }
-            
-            // 경고 건수 기준으로 정렬
-            filteredData.sort((a, b) => b.alertCount - a.alertCount);
-            
-            // 상위 5개 서버만 표시
-            filteredData = filteredData.slice(0, 5);
-            
-            // 테이블 업데이트
-            updateServerTable(filteredData);
+            // 필터링된 데이터로 테이블 업데이트
+            updateTable(serverData);
             
             // 타임스탬프 업데이트
             updateTimestamp();
         }
         
-        // 서버 테이블 업데이트
-        function updateServerTable(serverData) {
-            const tbody = document.querySelector('table tbody');
-            tbody.innerHTML = '';
+        // 테이블 업데이트 함수
+        function updateTable(data) {
+            const tableBody = document.getElementById('server-list');
+            tableBody.innerHTML = '';
             
-            if (serverData.length === 0) {
-                const row = document.createElement('tr');
-                const cell = document.createElement('td');
-                cell.colSpan = 3;
-                cell.textContent = '필터 조건에 맞는 서버가 없습니다.';
-                cell.style.textAlign = 'center';
-                cell.style.padding = '20px';
-                row.appendChild(cell);
-                tbody.appendChild(row);
-                return;
-            }
-            
-            serverData.forEach(server => {
+            data.forEach(server => {
                 const row = document.createElement('tr');
                 
-                // 서버 이름 셀 (경고 아이콘 포함)
+                // 서버 이름 셀
                 const nameCell = document.createElement('td');
-                if (server.hasHighAlert) {
+                if (server.isHighPriority) {
                     const alertIcon = document.createElement('span');
                     alertIcon.className = 'alert-icon';
                     alertIcon.textContent = '⚠';
@@ -408,10 +518,10 @@
                 
                 // 경고 건수 셀
                 const countCell = document.createElement('td');
-                countCell.textContent = `${server.alertCount}건`;
-                if (server.alertCount > 5) {
+                countCell.textContent = `${server.count}건`;
+                if (server.count >= 5) {
                     countCell.className = 'error-count';
-                } else if (server.alertCount > 2) {
+                } else if (server.count >= 3) {
                     countCell.className = 'warning-count';
                 }
                 row.appendChild(countCell);
@@ -421,41 +531,25 @@
                 issueCell.textContent = server.mainIssue;
                 row.appendChild(issueCell);
                 
-                tbody.appendChild(row);
+                tableBody.appendChild(row);
             });
         }
         
-        // CSV 다운로드
+        // CSV 다운로드 함수
         function downloadCSV() {
-            const timeFilter = document.getElementById('timeFilter').value;
-            const serverTypeFilter = document.getElementById('serverTypeFilter').value;
-            const alertTypeFilter = document.getElementById('alertTypeFilter').value;
-            
-            let filteredData = [...allServerData];
-            
-            // 필터 적용
-            if (serverTypeFilter !== 'all') {
-                filteredData = filteredData.filter(server => server.type === serverTypeFilter);
-            }
-            
-            if (alertTypeFilter !== 'all') {
-                filteredData = filteredData.filter(server => server.alertType === alertTypeFilter);
-            }
-            
-            // 상위 5개만 추출
-            filteredData.sort((a, b) => b.alertCount - a.alertCount);
-            filteredData = filteredData.slice(0, 5);
-            
-            // CSV 생성
+            // CSV 헤더
             let csvContent = "서버,경고 건수,경고 내용\n";
-            filteredData.forEach(server => {
-                csvContent += `${server.name},${server.alertCount},${server.mainIssue}\n`;
+            
+            // 데이터 행 추가
+            serverData.forEach(server => {
+                csvContent += `${server.name},${server.count},${server.mainIssue}\n`;
             });
             
+            // Blob 생성 및 다운로드
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
-            
             const link = document.createElement("a");
+            
             link.setAttribute("href", url);
             link.setAttribute("download", `서버_상태_요약_${new Date().toISOString().slice(0,10)}.csv`);
             link.style.visibility = 'hidden';
@@ -464,6 +558,92 @@
             link.click();
             document.body.removeChild(link);
         }
+        
+        // 분석 모달 표시 함수
+        function showAnalysisModal(type) {
+            const modal = document.getElementById('analysis-modal');
+            const titleElement = document.getElementById('modal-title');
+            const analysisTextElement = document.getElementById('analysis-text');
+            const recommendationTextElement = document.getElementById('recommendation-text');
+            
+            // 분석 유형에 따라 모달 내용 설정
+            if (type === 'cpu') {
+                titleElement.textContent = 'CPU 사용률 자동 분석';
+                analysisTextElement.innerHTML = `
+                    최근 24시간 동안 CPU 사용률 관련 경고가 총 15건 발생했습니다. 특히 <strong>web01</strong> 서버에서 가장 많은 4건의 경고가 발생했습니다.
+                    전체 경고 중 CPU 사용률 관련 경고는 약 23%를 차지하고 있으며, 주로 오전 시간대(9시~12시)에 집중적으로 발생했습니다.
+                `;
+                recommendationTextElement.innerHTML = `
+                    1. web01 서버의 워크로드 분산을 고려하세요.<br>
+                    2. 오전 시간대 서비스 요청 패턴을 분석하세요.<br>
+                    3. CPU 사용률이 80% 이상일 때 자동 스케일링 규칙 설정을 고려하세요.
+                `;
+            } else if (type === 'memory') {
+                titleElement.textContent = '메모리 사용량 자동 분석';
+                analysisTextElement.innerHTML = `
+                    최근 24시간 동안 메모리 누수 관련 경고가 총 11건 발생했습니다. 특히 <strong>app01</strong> 서버에서 가장 많은 6건의 경고가 발생했습니다.
+                    메모리 누수는 주로 자정~새벽 2시 사이에 집중적으로 발생했으며, 이는 배치 작업 시간대와 일치합니다.
+                `;
+                recommendationTextElement.innerHTML = `
+                    1. app01 서버의 배치 작업 코드를 검토하여 메모리 누수 가능성을 확인하세요.<br>
+                    2. 해당 서버의 메모리 사용량 추이를 24시간 모니터링하세요.<br>
+                    3. 메모리 누수가 의심되는 프로세스의 재시작 일정을 조정하세요.
+                `;
+            } else if (type === 'disk') {
+                titleElement.textContent = '디스크 사용량 자동 분석';
+                analysisTextElement.innerHTML = `
+                    최근 24시간 동안 디스크 관련 경고가 총 14건 발생했습니다. 특히 <strong>db01</strong> 서버에서 가장 많은 7건의 경고가 발생했습니다.
+                    db01 서버의 /var/log 디렉토리가 가장 빠르게 공간을 사용하고 있으며, 현재 사용량은 85%입니다.
+                `;
+                recommendationTextElement.innerHTML = `
+                    1. db01 서버의 로그 로테이션 설정을 검토하세요.<br>
+                    2. 오래된 로그 파일과 임시 파일을 정리하세요.<br>
+                    3. 필요하다면 디스크 공간을 추가로 할당하세요.<br>
+                    4. 중요하지 않은 로그의 상세 수준(log level)을 조정하세요.
+                `;
+            }
+            
+            // 모달 표시
+            modal.style.display = 'block';
+        }
+        
+        // 모달 닫기 함수
+        function closeModal() {
+            const modal = document.getElementById('analysis-modal');
+            modal.style.display = 'none';
+        }
+        
+        // 이벤트 리스너 설정
+        document.addEventListener('DOMContentLoaded', function() {
+            // 페이지 로드 시 타임스탬프 업데이트
+            updateTimestamp();
+            
+            // 필터 버튼 클릭 이벤트
+            document.getElementById('apply-filter').addEventListener('click', applyFilters);
+            
+            // CSV 다운로드 버튼 클릭 이벤트
+            document.getElementById('download-csv').addEventListener('click', downloadCSV);
+            
+            // 자동 분석 버튼 클릭 이벤트
+            const analysisButtons = document.querySelectorAll('.analysis-btn');
+            analysisButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const analysisType = this.getAttribute('data-type');
+                    showAnalysisModal(analysisType);
+                });
+            });
+            
+            // 모달 닫기 버튼 클릭 이벤트
+            document.querySelector('.close-btn').addEventListener('click', closeModal);
+            
+            // 모달 외부 클릭 시 닫기
+            const modal = document.getElementById('analysis-modal');
+            window.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    closeModal();
+                }
+            });
+        });
     </script>
 </body>
 </html>
