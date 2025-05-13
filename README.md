@@ -2,6 +2,12 @@
 
 본 데모는 OpenManager에 추가될 **자연어 기반 서버 분석 기능**을 보여줍니다. 서버 관리자가 "CPU 사용률 높은 서버 찾아줘"와 같이 쉬운 말로 물어보면 시스템이 자동으로 분석하여 결과를 보여주는 기능입니다.
 
+## 데모 사용 방법
+
+1. **GitHub 저장소**: https://github.com/skyasu2/openmanager-vibe-demo
+2. **라이브 데모**: https://deluxe-pony-b02296.netlify.app/ 에서 직접 사용해 볼 수 있습니다.
+3. **로컬 실행**: 저장소를 클론하여 `index.html` 파일을 브라우저에서 열어 실행할 수 있습니다.
+
 > **Vibe Coding 방식:** 이 데모는 AI(GPT, Claude, Gemini)를 활용한 신속 개발 방식으로 구현했습니다. 자세한 내용은 `code_notes.md`를 참고하세요.
 
 > **주의:** 데모용 가상 데이터만 사용했습니다. 실제 OpenManager와는 다릅니다.
@@ -19,6 +25,7 @@
 * **순수 웹 기술:** HTML, CSS, JavaScript만 사용 (프레임워크 없음)
 * **가상 데이터:** 실제 환경과 유사한 서버 30대 데이터 시뮬레이션
 * **자체 개발 분석 엔진:** `data_processor.js`로 데이터 필터링 및 분석
+* **배포 환경:** GitHub 저장소 + Netlify 무료 호스팅 연동
 
 ## 향후 계획
 
