@@ -1,153 +1,242 @@
-<script src="fixed_dummy_data.js"></script> <script src="data_processor.js"></script>
-
-<script>
-    // 전역 변수
-    let allServerData = []; // 모든 고정 데이터를 담을 변수
-    let dataProcessor = null;
-    
-    // 페이지 로드 시 데이터 로딩
-    document.addEventListener('DOMContentLoaded', async function() {
-        try {
-            // 고정 더미 데이터 로드
-            allServerData = getFixedDummyData(); // fixed_dummy_data.js의 함수 호출
-            console.log(`고정 더미 데이터 ${allServerData.length}개 로드 완료.`);
-            
-            // 데이터 처리기 초기화
-            dataProcessor = new ServerDataProcessor(allServerData);
-            
-            // 필터 적용 (초기 로드)
-            applyFilters();
-            
-            // 이벤트 리스너 설정
-            setupEventListeners();
-            
-            document.getElementById('loading-overlay').style.display = 'none';
-            
-        } catch (error) {
-            console.error('데이터 로딩 중 오류 발생:', error);
-            alert('서버 데이터를 로드하는데 실패했습니다.');
-            document.getElementById('loading-overlay').style.display = 'none';
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <style>
+        /* ... (style 내용 생략) ... */
+        /* 로딩 표시 스타일이 여기에 있거나 style.css 에 있어야 합니다. */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex; /* 기본 상태는 flex (보이도록) 또는 none (숨기도록) 일 수 있습니다. JS로 제어합니다. */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
         }
-    });
-    
-    // async function loadServerData() { ... } 이 함수는 이제 필요 없거나,
-    // getFixedDummyData()를 호출하는 간단한 형태로 변경할 수 있습니다.
-    // 여기서는 직접 DOMContentLoaded에서 처리했습니다.
-
-    // generateDummyData() 함수는 삭제합니다.
-
-    function applyFilters() {
-        document.getElementById('loading-overlay').style.display = 'flex';
         
-        setTimeout(() => {
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <div class="header">
+        <div class="logo">OpenManager 7.0</div>
+        <div class="nav-menu">
+            <a href="#" class="nav-item active">대시보드</a>
+            <a href="#" class="nav-item">서버 목록</a>
+            <a href="#" class="nav-item">경고 로그</a>
+            <a href="#" class="nav-item">설정</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <h1>서버 상태 요약</h1>
+        <div class="timestamp" id="timestamp">데이터 기준 시각: 로딩 중...</div>
+        
+        </div>
+
+    <script src="fixed_dummy_data.js"></script>
+    <script src="data_processor.js"></script>
+
+    <script>
+        // 전역 변수
+        let allServerData = []; // 모든 고정 데이터를 담을 변수
+        let dataProcessor = null;
+        
+        // 페이지 로드 시 데이터 로딩
+        document.addEventListener('DOMContentLoaded', async function() {
+            // 로딩 오버레이를 가장 먼저 보이도록 처리할 수 있습니다.
+            const initialLoadingOverlay = document.getElementById('loading-overlay');
+            if (initialLoadingOverlay) {
+                initialLoadingOverlay.style.display = 'flex';
+            }
+
             try {
-                const timeRange = document.getElementById('time-filter').value; // "24" 등 문자열
-                const serverType = document.getElementById('server-filter').value;
-                const alertType = document.getElementById('alert-filter').value; // "CPU 사용률" 등 문자열
+                // 고정 더미 데이터 로드
+                allServerData = getFixedDummyData(); // fixed_dummy_data.js의 함수 호출
+                console.log(`고정 더미 데이터 ${allServerData.length}개 로드 완료.`);
                 
-                // dataProcessor.applyFilters는 이제 전체 데이터(allServerData)를 내부적으로 사용하므로
-                // 별도로 데이터를 넘길 필요가 없을 수도 있지만,
-                // 만약 applyFilters가 항상 새로운 데이터셋에 대해 동작하도록 설계했다면,
-                // dataProcessor = new ServerDataProcessor(allServerData); // 필터 적용 전 항상 최신 데이터로 초기화
-                // const filteredData = dataProcessor.applyFilters(parseInt(timeRange), serverType, alertType);
-
-                // 또는 ServerDataProcessor가 내부 데이터를 가지고 필터링한다면:
-                const filteredData = dataProcessor.applyFilters(parseInt(timeRange), serverType, alertType);
-                                
-                const topServers = dataProcessor.countAlertsByServer(filteredData);
-                updateServerTable(topServers.slice(0, 5));
-                updateTimestamp();
-                document.getElementById('loading-overlay').style.display = 'none';
+                // 데이터 처리기 초기화
+                dataProcessor = new ServerDataProcessor(allServerData);
+                
+                // 필터 적용 (초기 로드)
+                applyFilters(); // 이 함수 내부에서도 loading-overlay를 사용합니다.
+                
+                // 이벤트 리스너 설정
+                setupEventListeners();
+                
+                // 모든 작업 완료 후 로딩 오버레이 숨김
+                if (initialLoadingOverlay) {
+                    initialLoadingOverlay.style.display = 'none';
+                }
+                
             } catch (error) {
-                console.error('필터 적용 중 오류 발생:', error);
-                alert('데이터 필터링 중 오류가 발생했습니다.');
-                document.getElementById('loading-overlay').style.display = 'none';
+                console.error('데이터 로딩 중 오류 발생:', error);
+                alert('서버 데이터를 로드하는데 실패했습니다.');
+                if (initialLoadingOverlay) { // 오류 발생 시에도 숨김 처리
+                    initialLoadingOverlay.style.display = 'none';
+                }
             }
-        }, 100); // UI 반응성을 위해 약간의 지연
-    }
-
-    function updateServerTable(servers) {
-        const tableBody = document.getElementById('server-list');
-        tableBody.innerHTML = '';
-        
-        if (servers.length === 0) {
-            // ... (기존 코드)
-            return;
-        }
-        
-        servers.forEach(server => {
-            const row = document.createElement('tr');
-            
-            const nameCell = document.createElement('td');
-            // server.name 은 이제 serverHostname 입니다.
-            // server.count 는 동일, server.mainIssue도 countAlertsByServer에서 생성
-            if (server.count >= 5) { // 이 조건은 유지하거나 경고 심각도에 따라 변경 가능
-                const alertIcon = document.createElement('span');
-                alertIcon.className = 'alert-icon';
-                alertIcon.textContent = '⚠'; // 아이콘은 유지
-                nameCell.appendChild(alertIcon);
-            }
-            nameCell.appendChild(document.createTextNode(server.name)); // server.name은 serverHostname
-            row.appendChild(nameCell);
-            
-            // ... (countCell, issueCell 기존 로직과 유사하게 server 객체의 필드명 확인)
-            const countCell = document.createElement('td');
-            countCell.textContent = `${server.count}건`;
-            if (server.count >= 10 && server.mainIssue.toLowerCase().includes('critical')) { // 예시: Critical 경고가 많을 때
-                countCell.className = 'error-count';
-            } else if (server.count >= 5) {
-                countCell.className = 'warning-count';
-            }
-            row.appendChild(countCell);
-
-            const issueCell = document.createElement('td');
-            issueCell.textContent = server.mainIssue; // countAlertsByServer 에서 생성된 값
-            row.appendChild(issueCell);
-
-            tableBody.appendChild(row);
         });
-    }
+        
+        function applyFilters() {
+            const loadingOverlay = document.getElementById('loading-overlay');
+            if (loadingOverlay) {
+                loadingOverlay.style.display = 'flex';
+            }
+            
+            setTimeout(() => {
+                try {
+                    const timeRange = document.getElementById('time-filter').value;
+                    const serverType = document.getElementById('server-filter').value;
+                    const alertType = document.getElementById('alert-filter').value;
+                    
+                    const filteredData = dataProcessor.applyFilters(parseInt(timeRange), serverType, alertType);
+                                    
+                    const topServers = dataProcessor.countAlertsByServer(filteredData);
+                    updateServerTable(topServers.slice(0, 5));
+                    updateTimestamp();
 
-    // runAnalysis, downloadCSV, updateTimestamp, setupEventListeners 함수는
-    // dataProcessor나 필터링된 데이터를 사용하는 부분에서 필드명 변경에 유의해야 합니다.
-    // 예를 들어 CSV 다운로드 시 server.name, server.mainIssue 등을 사용합니다.
-
-    // CSV 다운로드 함수 (데이터 구조 변경 반영)
-    function downloadCSV() {
-        try {
-            const timeRange = parseInt(document.getElementById('time-filter').value);
-            const serverType = document.getElementById('server-filter').value;
-            const alertType = document.getElementById('alert-filter').value;
-            
-            const filteredData = dataProcessor.applyFilters(timeRange, serverType, alertType);
-            const serversForCsv = dataProcessor.countAlertsByServer(filteredData); // 요약된 서버 목록
-            
-            let csvContent = "서버 호스트네임,서버 유형,경고 건수,주요 경고 내용\n";
-            
-            serversForCsv.forEach(server => {
-                // server.type은 countAlertsByServer에서 추가됨
-                csvContent += `${server.name},${server.type || 'N/A'},${server.count},"${(server.mainIssue || '').replace(/"/g, '""')}"\n`;
-            });
-            
-            // ... (Blob 생성 및 다운로드 로직은 기존과 동일)
-            const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' }); // BOM 추가 (Excel 한글 깨짐 방지)
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            
-            link.setAttribute("href", url);
-            link.setAttribute("download", `서버_상태_요약_${new Date().toISOString().slice(0,10)}.csv`);
-            link.style.visibility = 'hidden';
-            
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-        } catch (error) {
-            console.error('CSV 다운로드 중 오류 발생:', error);
-            alert('CSV 파일 생성 중 오류가 발생했습니다.');
+                } catch (error) {
+                    console.error('필터 적용 중 오류 발생:', error);
+                    alert('데이터 필터링 중 오류가 발생했습니다.');
+                } finally { // try...catch 와 관계없이 항상 실행
+                    if (loadingOverlay) {
+                        loadingOverlay.style.display = 'none';
+                    }
+                }
+            }, 100);
         }
-    }
-    // ... (나머지 함수들) ...
-</script>
+
+        // updateServerTable, downloadCSV 등 나머지 함수들은 이전과 동일하게 유지
+
+        // (추가) updateTimestamp 함수 (예시, 실제 필요에 맞게 수정)
+        function updateTimestamp() {
+            const timestampEl = document.getElementById('timestamp');
+            if (timestampEl) {
+                const now = new Date();
+                const options = { 
+                    year: 'numeric', month: 'numeric', day: 'numeric', 
+                    hour: '2-digit', minute: '2-digit', second: '2-digit',
+                    hour12: true 
+                };
+                timestampEl.textContent = `데이터 기준 시각: ${now.toLocaleString('ko-KR', options)}`;
+            }
+        }
+
+        // (추가) setupEventListeners 함수 (예시, 실제 필요에 맞게 수정)
+        function setupEventListeners() {
+            const applyFilterBtn = document.getElementById('apply-filter');
+            if (applyFilterBtn) {
+                applyFilterBtn.addEventListener('click', applyFilters);
+            }
+
+            const downloadCsvBtn = document.getElementById('download-csv');
+            if (downloadCsvBtn) {
+                downloadCsvBtn.addEventListener('click', downloadCSV);
+            }
+            // 추가적인 이벤트 리스너들...
+        }
+        
+        // updateServerTable 함수는 제공해주신 코드 그대로 사용
+        function updateServerTable(servers) {
+            const tableBody = document.getElementById('server-list');
+            tableBody.innerHTML = '';
+            
+            if (servers.length === 0) {
+                const row = document.createElement('tr');
+                const cell = document.createElement('td');
+                cell.colSpan = 3; // 테이블 컬럼 수에 맞게 조정
+                cell.textContent = '필터 조건에 맞는 서버가 없습니다.';
+                cell.style.textAlign = 'center';
+                cell.style.padding = '20px';
+                row.appendChild(cell);
+                tableBody.appendChild(row);
+                return;
+            }
+            
+            servers.forEach(server => {
+                const row = document.createElement('tr');
+                
+                const nameCell = document.createElement('td');
+                if (server.count >= 5) {
+                    const alertIcon = document.createElement('span');
+                    alertIcon.className = 'alert-icon';
+                    alertIcon.textContent = '⚠';
+                    nameCell.appendChild(alertIcon);
+                }
+                nameCell.appendChild(document.createTextNode(server.name));
+                row.appendChild(nameCell);
+                
+                const countCell = document.createElement('td');
+                countCell.textContent = `${server.count}건`;
+                if (server.count >= 10 && server.mainIssue && server.mainIssue.toLowerCase().includes('critical')) {
+                    countCell.className = 'error-count';
+                } else if (server.count >= 5) {
+                    countCell.className = 'warning-count';
+                }
+                row.appendChild(countCell);
+
+                const issueCell = document.createElement('td');
+                issueCell.textContent = server.mainIssue || 'N/A'; // mainIssue가 없을 경우 대비
+                row.appendChild(issueCell);
+
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // downloadCSV 함수는 제공해주신 코드 그대로 사용
+        function downloadCSV() {
+            try {
+                const timeRange = parseInt(document.getElementById('time-filter').value);
+                const serverType = document.getElementById('server-filter').value;
+                const alertType = document.getElementById('alert-filter').value;
+                
+                const filteredData = dataProcessor.applyFilters(timeRange, serverType, alertType);
+                const serversForCsv = dataProcessor.countAlertsByServer(filteredData);
+                
+                let csvContent = "서버 호스트네임,서버 유형,경고 건수,주요 경고 내용\n";
+                
+                serversForCsv.forEach(server => {
+                    csvContent += `${server.name},${server.type || 'N/A'},${server.count},"${(server.mainIssue || '').replace(/"/g, '""')}"\n`;
+                });
+                
+                const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                
+                link.setAttribute("href", url);
+                link.setAttribute("download", `서버_상태_요약_${new Date().toISOString().slice(0,10)}.csv`);
+                link.style.visibility = 'hidden';
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+            } catch (error) {
+                console.error('CSV 다운로드 중 오류 발생:', error);
+                alert('CSV 파일 생성 중 오류가 발생했습니다.');
+            }
+        }
+
+    </script>
 </body>
 </html>
