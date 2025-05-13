@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <title>서버 상태 요약</title>
-  <link rel="stylesheet" href="style.css">  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"> <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet"> <script>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+  <script>
     function formatTime(ts) {
       const d = new Date(ts);
       return d.toLocaleString("ko-KR");
@@ -12,14 +15,36 @@
       const now = new Date();
       document.getElementById("timestamp").innerText = "데이터 기준 시각: " + formatTime(now);
     };
+
+    function downloadCsv() {
+      const data = [
+        ["서버", "경고 건수", "경고 내용"],
+        ["db01", "7건", "디스크 경고"],
+        ["app01", "6건", "메모리 누수"],
+        ["web01", "4건", "CPU 사용률"],
+        ["web02", "3건", "네트워크 지연"],
+        ["db02", "2건", "접속 오류"]
+      ];
+
+      let csvContent = "data:text/csv;charset=utf-8," + data.map(e => e.join(",")).join("\n");
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "server_status.csv");
+      document.body.appendChild(link);
+      link.click();
+    }
   </script>
 </head>
 <body>
-  <div class="container">  <h1>서버 상태 요약</h1>
+  <div class="container">
+    <h1>서버 상태 요약</h1>
     <div class="timestamp" id="timestamp">데이터 기준 시각: 로딩 중...</div>
 
     <h2>경고 상위 서버 TOP5</h2>
-    <table id="top5-table">  <thead>
+    <table id="top5-table">
+      <thead>
         <tr>
           <th>서버</th>
           <th>경고 건수</th>
@@ -27,7 +52,9 @@
         </tr>
       </thead>
       <tbody>
-        <tr class="highlight">  <td><i class="fas fa-exclamation-triangle"></i> db01</td>  <td>7건</td>
+        <tr class="highlight">
+          <td><i class="fas fa-exclamation-triangle"></i> db01</td>
+          <td>7건</td>
           <td>디스크 경고</td>
         </tr>
         <tr class="highlight">
@@ -52,6 +79,8 @@
         </tr>
       </tbody>
     </table>
+
+    <button onclick="downloadCsv()">CSV 다운로드</button>
   </div>
 
   <script>
