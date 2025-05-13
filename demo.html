@@ -3,9 +3,40 @@
 <head>
   <meta charset="UTF-8">
   <title>서버 상태 요약</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      margin: 40px;
+      background-color: #f8f9fa;
+      color: #333;
+    }
+    h1 {
+      color: #2c3e50;
+    }
+    .timestamp {
+      color: #777;
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: white;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 12px;
+      text-align: left;
+    }
+    th {
+      background-color: #f0f2f5;
+    }
+    .highlight {
+      color: #e74c3c;
+      font-weight: bold;
+    }
+  </style>
   <script>
     function formatTime(ts) {
       const d = new Date(ts);
@@ -15,77 +46,26 @@
       const now = new Date();
       document.getElementById("timestamp").innerText = "데이터 기준 시각: " + formatTime(now);
     };
-
-    function downloadCsv() {
-      const data = [
-        ["서버", "경고 건수", "경고 내용"],
-        ["db01", "7건", "디스크 경고"],
-        ["app01", "6건", "메모리 누수"],
-        ["web01", "4건", "CPU 사용률"],
-        ["web02", "3건", "네트워크 지연"],
-        ["db02", "2건", "접속 오류"]
-      ];
-
-      let csvContent = "data:text/csv;charset=utf-8," + data.map(e => e.join(",")).join("\n");
-
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
-      link.setAttribute("download", "server_status.csv");
-      document.body.appendChild(link);
-      link.click();
-    }
   </script>
 </head>
 <body>
-  <div class="container">
-    <h1>서버 상태 요약</h1>
-    <div class="timestamp" id="timestamp">데이터 기준 시각: 로딩 중...</div>
+  <h1>서버 상태 요약</h1>
+  <div class="timestamp" id="timestamp">데이터 기준 시각: 로딩 중...</div>
 
-    <h2>경고 상위 서버 TOP5</h2>
-    <table id="top5-table">
-      <thead>
-        <tr>
-          <th>서버</th>
-          <th>경고 건수</th>
-          <th>경고 내용</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr class="highlight">
-          <td><i class="fas fa-exclamation-triangle"></i> db01</td>
-          <td>7건</td>
-          <td>디스크 경고</td>
-        </tr>
-        <tr class="highlight">
-          <td><i class="fas fa-exclamation-triangle"></i> app01</td>
-          <td>6건</td>
-          <td>메모리 누수</td>
-        </tr>
-        <tr>
-          <td>web01</td>
-          <td>4건</td>
-          <td>CPU 사용률</td>
-        </tr>
-        <tr>
-          <td>web02</td>
-          <td>3건</td>
-          <td>네트워크 지연</td>
-        </tr>
-        <tr>
-          <td>db02</td>
-          <td>2건</td>
-          <td>접속 오류</td>
-        </tr>
-      </tbody>
-    </table>
+  <table>
+    <thead>
+      <tr>
+        <th>순위</th>
+        <th>서버</th>
+        <th>경고 건수</th>
+        <th>문제 요약</th>
+      </tr>
+    </thead>
+    <tbody id="summary-body">
+      <!-- summary.js가 이 영역에 데이터를 채움 -->
+    </tbody>
+  </table>
 
-    <button onclick="downloadCsv()">CSV 다운로드</button>
-  </div>
-
-  <script>
-    // 향후 자동 새로고침 시뮬레이션 가능
-    // setTimeout(() => location.reload(), 10000);
-  </script>
+  <script src="summary.js"></script>
 </body>
 </html>
