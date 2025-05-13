@@ -6,7 +6,6 @@
     <title>OpenManager 7.0 - 자연어 기반 서버 분석</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* ... (스타일은 이전 답변과 동일하게 유지) ... */
         body { font-family: 'Malgun Gothic', 'Segoe UI', sans-serif; margin: 0; padding: 0; color: #333; background-color: #f5f7fa; }
         .header { background-color: #2c3e50; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
         .logo { font-size: 20px; font-weight: bold; }
@@ -23,7 +22,7 @@
         .nlp-section h3 { margin-top: 0; color: #0056b3; border-bottom-color: #add8e6; }
         .nlp-input-group { display: flex; gap: 10px; margin-bottom: 10px; align-items: center;}
         #nlp-query-input { flex-grow: 1; padding: 10px; border: 1px solid #ced4da; border-radius: 4px; font-size: 0.95em;}
-        #nlp-query-select { padding: 10px; border: 1px solid #ced4da; border-radius: 4px; background-color: white; font-size: 0.95em; min-width: 250px; /* 너비 조정 */}
+        #nlp-query-select { padding: 10px; border: 1px solid #ced4da; border-radius: 4px; background-color: white; font-size: 0.95em; min-width: 250px; }
         #nlp-submit-btn { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s; font-size: 0.95em;}
         #nlp-submit-btn:hover { background-color: #0056b3; }
         .nlp-result-explanation { background-color: #f8f9fa; padding: 10px; border-radius: 4px; font-size: 0.85em; color: #495057; margin-bottom: 15px; border: 1px dashed #ced4da;}
@@ -103,15 +102,15 @@
                 <input type="text" id="nlp-query-input" placeholder="예: CPU 사용률 높은 서버 찾아줘">
                 <select id="nlp-query-select">
                     <option value="">-- 예시 질문 선택 --</option>
-                    <option data-report-type="cpu_high" value="CPU 사용률이 80% 이상인 서버 목록 보여줘">CPU 80% 이상 서버</option>
-                    <option data-report-type="memory_leak_candidate" value="메모리 사용량이 지속적으로 높은 WAS 서버는?">메모리 누수 의심 WAS</option>
-                    <option data-report-type="disk_space_critical" value="디스크 공간 90% 이상 사용 중인 DB 서버">디스크 부족 DB 서버</option>
-                    <option data-report-type="network_traffic_high" value="지난 6시간 동안 네트워크 트래픽(Out)이 가장 많았던 API 서버">6시간 내 트래픽 TOP API 서버</option>
-                    <option data-report-type="critical_servers_location" value="Seoul-IDC에서 Critical 상태인 모든 서버와 그 원인">서울IDC Critical 서버 원인</option>
-                    <option data-report-type="error_application" value="'OrderService' 애플리케이션 오류가 발생한 서버와 시간">OrderService 오류 서버/시간</option>
-                    <option data-report-type="security_login_fail" value="최근 24시간 내 로그인 실패(Security) 경고가 있었던 서버는?">24시간 내 로그인 실패 경고</option>
-                    <option data-report-type="batch_job_status" value="어제 실행된 BATCH 서버들의 작업 상태 요약">어제 BATCH 작업 상태</option>
-                    <option data-report-type="generic_problem_summary" value="오늘 발생한 모든 Critical 및 Error 경고 요약">오늘 주요 경고 요약</option>
+                    <option data-report-type="cpu_threshold" value="CPU 사용률이 80% 이상인 서버 목록 보여줘">CPU 80% 이상 서버</option>
+                    <option data-report-type="memory_leak_was" value="메모리 사용량이 지속적으로 높은 WAS 서버는?">메모리 누수 의심 WAS</option>
+                    <option data-report-type="disk_critical_db" value="디스크 공간 90% 이상 사용 중인 DB 서버">디스크 부족 DB 서버</option>
+                    <option data-report-type="network_top_api_6h" value="지난 6시간 동안 네트워크 트래픽(Out)이 가장 많았던 API 서버">6시간 내 트래픽 TOP API 서버</option>
+                    <option data-report-type="critical_location_cause" value="Seoul-IDC에서 Critical 상태인 모든 서버와 그 원인">서울IDC Critical 서버 원인</option>
+                    <option data-report-type="application_orderservice_error" value="'OrderService' 애플리케이션 오류가 발생한 서버와 시간">OrderService 오류 서버/시간</option>
+                    <option data-report-type="security_login_fail_24h" value="최근 24시간 내 로그인 실패(Security) 경고가 있었던 서버는?">24시간 내 로그인 실패 경고</option>
+                    <option data-report-type="batch_job_yesterday" value="어제 실행된 BATCH 서버들의 작업 상태 요약">어제 BATCH 작업 상태</option>
+                    <option data-report-type="critical_error_today" value="오늘 발생한 모든 Critical 및 Error 경고 요약">오늘 주요 경고 요약</option>
                 </select>
                 <button id="nlp-submit-btn">질의 실행</button>
             </div>
@@ -184,7 +183,7 @@
     <script src="fixed_dummy_data.js"></script>
     <script src="data_processor.js"></script>
     <script>
-        // --- 전역 변수 및 기본 함수 (이전과 동일) ---
+        // --- 전역 변수 및 기본 함수 ---
         let allServerData = [];
         let dataProcessor = null;
         const loadingOverlay = document.getElementById('loading-overlay');
@@ -196,7 +195,7 @@
         function showLoading() { if (loadingOverlay) loadingOverlay.style.display = 'flex'; }
         function hideLoading() { if (loadingOverlay) loadingOverlay.style.display = 'none'; }
 
-        function populateDropdown(selectElement, optionsArray, defaultOptionText) { /* 이전과 동일 */
+        function populateDropdown(selectElement, optionsArray, defaultOptionText) {
             if (!selectElement) { console.error("Dropdown element not found for: " + defaultOptionText); return; }
             selectElement.innerHTML = `<option value="all">${defaultOptionText}</option>`;
             (optionsArray || []).forEach(optionValue => {
@@ -206,7 +205,7 @@
             });
         }
         
-        function initializeLegacyFilters() { /* 이전과 동일 */
+        function initializeLegacyFilters() {
             if (!dataProcessor) { console.error("DataProcessor not ready for initializing filters."); return; }
             populateDropdown(document.getElementById('server-type-filter'), dataProcessor.getUniqueServerTypes(), '모든 서버 유형');
             populateDropdown(document.getElementById('location-filter'), dataProcessor.getUniqueLocations(), '모든 위치');
@@ -224,7 +223,7 @@
             }
         }
 
-        function renderTopResourceList(listElementId, servers) { /* 이전과 동일 */
+        function renderTopResourceList(listElementId, servers) {
             const listElement = document.getElementById(listElementId);
             if (!listElement) { console.error(`Element with ID '${listElementId}' not found.`); return; }
             listElement.innerHTML = '';
@@ -243,7 +242,7 @@
             });
         }
 
-        function renderProblematicServersList(servers) { /* 이전과 동일 */
+        function renderProblematicServersList(servers) {
              const listElement = document.getElementById('problematic-servers-list');
             if (!listElement) { console.error("Element with ID 'problematic-servers-list' not found."); return; }
             listElement.innerHTML = '';
@@ -267,7 +266,7 @@
                 listElement.appendChild(itemDiv);
             });
         }
-        function renderNLPSummaryList(servers, query, detectedReportType) { /* 이전과 동일 */
+        function renderNLPSummaryList(servers, query, detectedReportType) {
             const resultListEl = document.getElementById('nlp-summary-list');
             const reportButtonContainer = document.getElementById('nlp-report-button-container');
             if (!resultListEl || !reportButtonContainer) { console.error("NLP result/button container not found."); return;}
@@ -302,7 +301,7 @@
                 reportButtonContainer.appendChild(reportButton);
             }
         }
-        function showReportModal(title, content) { /* 이전과 동일 */
+        function showReportModal(title, content) {
             if (reportModal && reportTitleEl && reportTextContentEl) {
                 reportTitleEl.textContent = title;
                 reportTextContentEl.textContent = content; 
@@ -312,92 +311,128 @@
             }
         }
 
-
-        // --- 보고서 생성 로직 (패턴화 및 상세화) ---
         function generatePredefinedReport(reportType, query, nlpSummaryData) {
             let reportTitle = "분석 보고서";
             let reportContent = `[원본 질의] "${query}"\n========================================\n\n`;
-            
-            const affectedServers = nlpSummaryData && nlpSummaryData.length > 0 ? nlpSummaryData : [];
-            const topProblemServer = affectedServers.length > 0 ? affectedServers[0] : null; // NLP 요약 결과 중 가장 문제점수 높은 서버
-            const topN = 3; // 보고서에 포함할 TOP N 리소스 서버 수
-
-            // 헬퍼: 특정 리소스 TOP N 서버 정보 문자열 생성
-            const getResourceTopNString = (resourceKey, unit) => {
-                if (!dataProcessor) return "데이터 프로세서 미초기화\n";
-                const topServers = dataProcessor.getTopNServersByResource(allServerData, resourceKey, topN);
+            const affectedServersFromNlp = nlpSummaryData && nlpSummaryData.length > 0 ? nlpSummaryData : [];
+            const topProblemServer = affectedServersFromNlp.length > 0 ? affectedServersFromNlp[0] : null;
+            const topN = 3;
+            const getResourceTopNString = (resourceKey, unit, dataToProcess = allServerData) => {
+                if (!dataProcessor || !dataToProcess || dataToProcess.length === 0) return "데이터 프로세서 미초기화 또는 데이터 없음\n";
+                const topServers = dataProcessor.getTopNServersByResource(dataToProcess, resourceKey, topN);
                 let str = "";
                 if (topServers && topServers.length > 0) {
                     topServers.forEach((s, idx) => {
                         str += `${idx + 1}. ${s.name.split('.')[0]} (${s.type}, ${s.location}): 평균 ${s.avgUsage.toFixed(1)}${unit}\n`;
                     });
-                } else {
-                    str = `관련 서버 정보 없음\n`;
-                }
+                } else { str = `관련 서버 정보 없음 (리소스: ${resourceKey})\n`; }
                 return str;
             };
-
-            // 헬퍼: 질의 관련 주요 서버 정보 문자열 생성
             const getQueryRelatedServerInfoString = () => {
                 if (topProblemServer && topProblemServer.name) {
                     return `[질의 관련 주요 서버 분석]\n` +
                            `- 서버: ${topProblemServer.name} (유형: ${topProblemServer.type}, 위치: ${topProblemServer.location})\n` +
-                           `- 분석 점수: ${topProblemServer.score} (Critical:${topProblemServer.criticalAlertCount}, Error:${topProblemServer.errorAlertCount}, Warning:${topProblemServer.warningAlertCount})\n` +
+                           `- 분석 점수: ${topProblemServer.score} (C:${topProblemServer.criticalAlertCount}, E:${topProblemServer.errorAlertCount}, W:${topProblemServer.warningAlertCount})\n` +
                            `- 주요 경고/문제: ${topProblemServer.recentProblemMessages}\n\n`;
                 }
                 return "질의와 직접 관련된 주요 문제 서버 정보가 명확하지 않거나, 여러 서버에 걸친 일반적인 상황일 수 있습니다.\n\n";
             };
-            
-            // 보고서 내용 패턴화
             reportContent += getQueryRelatedServerInfoString();
 
             switch(reportType.toLowerCase()) {
-                case 'cpu_high':
-                case 'cpu':
+                case 'cpu_threshold': case 'cpu_high': case 'cpu':
                     reportTitle = "CPU 사용률 상세 분석 보고서";
-                    reportContent += "[상세 분석 및 권고]\nCPU 사용률이 비정상적으로 높은 것은 시스템 성능 저하의 주요 원인이 됩니다. 다음 사항을 점검하십시오.\n\n";
+                    reportContent += "[상세 분석 및 권고]\nCPU 사용률이 비정상적으로 높은 것은 시스템 성능 저하의 주요 원인이 됩니다.\n\n";
                     reportContent += `[전체 기간 CPU 사용률 TOP${topN} 서버 (평균)]\n${getResourceTopNString('cpu', '%')}`;
-                    reportContent += "\n[조치 권고 사항]\n1. 실시간 모니터링: 'top', 'htop' 또는 APM을 사용하여 현재 CPU를 많이 사용하는 프로세스를 식별합니다.\n2. 로그 분석: 해당 서버의 시스템 로그 및 애플리케이션 로그에서 과도한 CPU 사용과 관련된 오류나 경고를 확인합니다.\n3. 원인 조사: 특정 애플리케이션, 백그라운드 작업, 비효율적인 쿼리, 외부 공격 등 원인을 다각도로 분석합니다.\n4. 최적화: 코드 최적화, 불필요한 프로세스 정리, 스케줄링 조정 등을 수행합니다.\n5. 리소스 증설: 지속적인 고부하 시 서버 스펙 업그레이드(Scale-up) 또는 부하 분산(Scale-out)을 고려합니다.";
+                    reportContent += "\n[조치 권고 사항]\n1. 실시간 모니터링을 통해 현재 CPU를 많이 사용하는 프로세스를 식별합니다.\n2. 해당 서버의 시스템 및 애플리케이션 로그에서 과도한 CPU 사용과 관련된 오류나 경고를 확인합니다.\n3. 특정 애플리케이션, 백그라운드 작업, 비효율적인 쿼리 등 원인을 다각도로 분석합니다.\n4. 코드 최적화, 불필요한 프로세스 정리, 스케줄링 조정 등을 수행합니다.\n5. 지속적인 고부하 시 서버 스펙 업그레이드 또는 부하 분산을 고려합니다.";
                     break;
-                case 'memory_leak_candidate':
-                case 'memory':
+                case 'memory_leak_was': case 'memory':
                     reportTitle = "메모리 사용 현황 및 누수 의심 분석 보고서";
                     reportContent += "[상세 분석 및 권고]\n메모리 사용량이 지속적으로 높거나 급증하는 현상은 메모리 누수 또는 부족을 의미할 수 있습니다.\n\n";
                     reportContent += `[전체 기간 메모리 사용률 TOP${topN} 서버 (평균)]\n${getResourceTopNString('memory', '%')}`;
-                    reportContent += "\n[조치 권고 사항]\n1. 메모리 사용 패턴 분석: 시간대별 메모리 사용량 변화 추이를 관찰하여 비정상적인 증가 패턴을 확인합니다.\n2. 누수 탐지: Java 애플리케이션의 경우 JVM Heap Dump 분석, GC 로그 분석을 통해 메모리 누수 지점을 찾습니다. 기타 언어의 경우 해당 언어의 프로파일링 도구를 사용합니다.\n3. 설정 최적화: 애플리케이션 및 시스템의 메모리 관련 설정(예: JVM Heap Size, DB 버퍼 풀)을 검토하고 최적화합니다.\n4. 불필요한 객체/캐시 정리: 장시간 사용되지 않거나 불필요하게 큰 메모리를 차지하는 객체 및 캐시를 정리합니다.";
+                    reportContent += "\n[조치 권고 사항]\n1. 시간대별 메모리 사용량 변화 추이를 관찰하여 비정상적인 증가 패턴을 확인합니다.\n2. JVM Heap Dump 분석, GC 로그 분석(Java의 경우) 또는 해당 언어 프로파일링 도구를 사용하여 누수 지점을 찾습니다.\n3. 애플리케이션 및 시스템의 메모리 관련 설정(예: JVM Heap Size, DB 버퍼 풀)을 검토하고 최적화합니다.\n4. 장시간 사용되지 않거나 불필요하게 큰 메모리를 차지하는 객체 및 캐시를 정리합니다.";
                     break;
-                case 'disk_space_critical':
-                case 'disk':
+                case 'disk_critical_db': case 'disk':
                     reportTitle = "디스크 공간 및 I/O 분석 보고서";
                     reportContent += "[상세 분석 및 권고]\n디스크 공간 부족은 서비스 중단을, I/O 병목은 성능 저하를 야기합니다.\n\n";
                     reportContent += `[전체 기간 디스크 사용률 TOP${topN} 서버 (평균)]\n${getResourceTopNString('disk', '%')}`;
-                    reportContent += "\n[조치 권고 사항]\n1. 공간 확보: 'df', 'du' 명령으로 용량 확인 후 불필요한 파일(오래된 로그, 백업, 임시 파일)을 삭제하고 로그 로테이션을 설정합니다.\n2. I/O 분석: 'iostat', 'iotop'으로 I/O 병목 지점을 확인하고, 과도한 I/O 유발 프로세스를 개선합니다.\n3. 파일 시스템 점검: 파일 시스템 오류 여부를 확인하고, 필요시 복구 작업을 수행합니다.\n4. 용량/성능 증설: 디스크 용량 추가 또는 고성능 디스크(SSD)로의 교체를 고려합니다.";
+                    reportContent += "\n[조치 권고 사항]\n1. 'df', 'du' 명령으로 용량 확인 후 불필요한 파일(로그, 백업, 임시 파일)을 삭제하고 로그 로테이션을 설정합니다.\n2. 'iostat', 'iotop'으로 I/O 병목 지점을 확인하고, 과도한 I/O 유발 프로세스를 개선합니다.\n3. 파일 시스템 오류 여부를 확인하고, 필요시 복구 작업을 수행합니다.\n4. 디스크 용량 추가 또는 고성능 디스크(SSD)로의 교체를 고려합니다.";
                     break;
-                case 'network_traffic_high':
-                case 'network':
+                case 'network_top_api_6h': case 'network':
                     reportTitle = "네트워크 트래픽 및 연결 상태 분석 보고서";
                     reportContent += "[상세 분석 및 권고]\n과도한 네트워크 트래픽 또는 잦은 연결 오류는 서비스 품질에 영향을 줍니다.\n\n";
                     reportContent += `[전체 기간 네트워크 트래픽(In+Out) TOP${topN} 서버 (평균)]\n${getResourceTopNString('network', ' Mbps')}`;
-                    reportContent += "\n[조치 권고 사항]\n1. 트래픽 패턴 분석: 'iftop', 'nethogs', 'tcpdump' 등으로 트래픽 발생량, 프로토콜, 출발지/목적지 IP를 분석하여 비정상 트래픽을 식별합니다.\n2. 연결 상태 점검: 'netstat', 'ss' 명령으로 연결 상태(ESTABLISHED, TIME_WAIT 등)를 확인하고, 과도한 연결 또는 연결 실패 원인을 파악합니다.\n3. 외부 요인 점검: DDoS 공격, 악성코드 감염, 외부 서비스 연동 문제 등을 확인합니다.\n4. 설정 최적화 및 증설: 네트워크 인터페이스 설정, 방화벽 규칙을 검토하고, 필요시 대역폭 증설 또는 로드밸런서 도입을 고려합니다.";
+                    reportContent += "\n[조치 권고 사항]\n1. 'iftop', 'nethogs', 'tcpdump' 등으로 트래픽 발생량, 프로토콜, IP를 분석하여 비정상 트래픽을 식별합니다.\n2. 'netstat', 'ss' 명령으로 연결 상태를 확인하고, 과도한 연결 또는 연결 실패 원인을 파악합니다.\n3. DDoS 공격, 악성코드 감염, 외부 서비스 연동 문제 등을 확인합니다.\n4. 네트워크 인터페이스 설정, 방화벽 규칙을 검토하고, 필요시 대역폭 증설 또는 로드밸런서 도입을 고려합니다.";
                     break;
-                case 'critical_servers_location':
-                case 'error_application':
-                case 'security_login_fail':
-                case 'batch_job_status': // 이 경우는 좀 더 특화된 보고서 필요
+                case 'application_orderservice_error': case 'application_error':
+                    reportTitle = "애플리케이션 오류 분석 보고서";
+                    reportContent += "[상세 분석 및 권고]\n애플리케이션 레벨에서 오류가 발생한 서버에 대한 분석입니다.\n";
+                    if (affectedServersFromNlp.length > 0) {
+                        reportContent += "\n[질의 관련 오류 발생 서버 목록]\n";
+                        affectedServersFromNlp.forEach(s => {
+                            const appAlerts = (allServerData.find(d => d.serverHostname === s.name)?.alerts || [])
+                                .filter(al => al.type === 'Application' && (query.includes('OrderService') ? al.message.includes('OrderService') : true))
+                                .map(al => `[${al.severity}] ${al.message}`).join('; ');
+                            if(appAlerts) reportContent += `- ${s.name} (타입: ${s.type}, 위치: ${s.location})\n   오류 내용: ${appAlerts}\n`;
+                        });
+                    } else { reportContent += "\n현재 조건에서 애플리케이션 오류가 발생한 서버를 찾지 못했습니다.\n"; }
+                    reportContent += "\n[조치 권고 사항]\n1. 해당 서버의 애플리케이션 로그 상세 분석 및 스택 트레이스 확인.\n2. 오류 발생 코드 특정 및 재현 테스트, 버그 수정 및 패치 배포.\n3. APM 도구를 활용한 실시간 오류 모니터링 강화.";
+                    break;
+                 case 'security_login_fail_24h': case 'security':
+                    reportTitle = "보안 경고 분석 보고서";
+                    reportContent += "[상세 분석 및 권고]\n보안 관련 경고가 발생한 서버에 대한 분석입니다.\n";
+                     if (affectedServersFromNlp.length > 0) {
+                        reportContent += "\n[질의 관련 보안 경고 발생 서버 목록]\n";
+                        affectedServersFromNlp.forEach(s => {
+                            const secAlerts = (allServerData.find(d => d.serverHostname === s.name)?.alerts || [])
+                                .filter(al => al.type === 'Security' && (query.includes('로그인 실패') ? (al.message.includes('로그인') || al.message.toLowerCase().includes('login')) : true ) )
+                                .map(al => `[${al.severity}] ${al.message}`).join('; ');
+                            if(secAlerts) reportContent += `- ${s.name} (타입: ${s.type}, 위치: ${s.location})\n   경고 내용: ${secAlerts}\n`;
+                        });
+                    } else { reportContent += "\n현재 조건에서 보안 경고가 발생한 서버를 찾지 못했습니다.\n"; }
+                    reportContent += "\n[조치 권고 사항]\n1. 침해 사고 분석 및 영향 범위 확인, 관련 계정 암호 변경 및 접근 통제 강화.\n2. 최신 보안 패치 적용 및 시스템 보안 설정 강화, 방화벽 및 IDS/IPS 정책 검토.\n3. 정기적인 보안 취약점 점검 수행.";
+                    break;
+                case 'batch_job_yesterday':
+                     reportTitle = "어제 실행된 BATCH 서버 작업 상태 요약 보고서";
+                     reportContent += "[상세 분석 및 권고]\n어제 실행된 BATCH 서버들의 작업 관련 경고 및 상태 분석입니다.\n";
+                     const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+                     const batchServersYesterday = (allServerData || [])
+                        .filter(d => {
+                            const itemDate = new Date(d.timestamp);
+                            return d.serverType === 'BATCH' && 
+                                   itemDate.getFullYear() === yesterday.getFullYear() &&
+                                   itemDate.getMonth() === yesterday.getMonth() &&
+                                   itemDate.getDate() === yesterday.getDate() &&
+                                   d.alerts.some(al => al.type === 'Process' || al.message.toLowerCase().includes('batch'));
+                        })
+                        .sort((a,b) => b.alerts.length - a.alerts.length || new Date(b.timestamp) - new Date(a.timestamp))
+                        .slice(0,5);
+                    if (batchServersYesterday.length > 0) {
+                        reportContent += "\n[어제 주요 BATCH 서버 상태]\n";
+                        batchServersYesterday.forEach(s_evt => {
+                             const batchAlerts = s_evt.alerts.filter(al => al.type === 'Process' || al.message.toLowerCase().includes('batch')).map(al => `[${al.severity}] ${al.message}`).join('; ');
+                             reportContent += `- ${s_evt.serverHostname.split('.')[0]} (${s_evt.location}) - ${new Date(s_evt.timestamp).toLocaleTimeString('ko-KR')}\n`;
+                             reportContent += `  상태: ${s_evt.status}, 경고: ${batchAlerts || "특이사항 없음"}\n`;
+                        });
+                    } else { reportContent += "\n어제 실행된 BATCH 서버 중 특이사항을 찾지 못했습니다.\n"; }
+                    reportContent += "\n[조치 권고 사항]\n1. BATCH 작업 스케줄러 및 실행 로그 확인.\n2. 실패한 작업이 있다면 원인 분석 및 재실행.\n3. 작업 수행 시간, 리소스 사용량 등을 모니터링하여 최적화.";
+                    break;
+                case 'critical_location_cause':
+                case 'critical_error_today':
+                case 'error_status': 
                 case 'generic_problem_summary':
-                default: // Critical, Error, Application, Security 등 특정 문제 타입 또는 일반 요약
-                    reportTitle = `${detectedReportType.replace(/_/g, ' ').toUpperCase()} 종합 분석 보고서`;
+                default: 
+                    reportTitle = `${(detectedReportType || 'GENERIC_PROBLEM').replace(/_/g, ' ').toUpperCase()} 종합 분석 보고서`;
                     reportContent += `[상세 분석 및 권고]\n선택된 질의 조건에 따라 다음 서버들에서 주요 문제/상태가 식별되었습니다.\n\n`;
-                    if (affectedServers.length > 0) {
-                        affectedServers.forEach(s => {
+                    if (affectedServersFromNlp.length > 0) {
+                        affectedServersFromNlp.forEach(s => {
                             reportContent += `- 서버: ${s.name} (유형: ${s.type}, 위치: ${s.location})\n`;
-                            reportContent += `  분석 점수: ${s.score}, Critical: ${s.criticalAlertCount}, Error: ${s.errorAlertCount}, Warning: ${s.warningAlertCount}\n`;
+                            reportContent += `  분석 점수: ${s.score}, Critical:${s.criticalAlertCount}, Error:${s.errorAlertCount}, Warning:${s.warningAlertCount}\n`;
                             reportContent += `  주요 문제/경고: ${s.recentProblemMessages}\n`;
-                            // 해당 서버의 최근 상세 이벤트 몇 개를 더미 데이터에서 가져와 추가
                             const serverEvents = (allServerData || [])
                                 .filter(d => d.serverHostname === s.name && d.alerts.length > 0)
                                 .sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp))
-                                .slice(0, 2); // 최근 2개 경고 이벤트
+                                .slice(0, 2); 
                             if (serverEvents.length > 0) {
                                 reportContent += `  최근 상세 경고 이벤트:\n`;
                                 serverEvents.forEach(evt => {
@@ -408,17 +443,14 @@
                             }
                             reportContent += "\n";
                         });
-                    } else {
-                        reportContent += "해당 조건에 특이사항이 있는 서버를 찾지 못했습니다.\n\n";
-                    }
-                    reportContent += `[일반 조치 권고]\n1. 식별된 서버의 시스템 및 애플리케이션 로그를 즉시 확인하여 문제의 근본 원인을 파악합니다.\n2. 문제의 심각도와 서비스 영향도에 따라 긴급 복구 또는 계획된 유지보수를 진행합니다.\n3. 동일 문제 재발 방지를 위해 원인 분석 결과를 바탕으로 시스템 설정 변경, 코드 수정, 모니터링 강화 등의 후속 조치를 수행합니다.\n4. 필요한 경우 관련 팀(개발, 운영, 보안 등)과 협력하여 문제를 해결합니다.`;
+                    } else { reportContent += "해당 조건에 특이사항이 있는 서버를 찾지 못했습니다.\n\n"; }
+                    reportContent += `[일반 조치 권고]\n1. 식별된 서버의 시스템 및 애플리케이션 로그를 즉시 확인하여 문제의 근본 원인을 파악합니다.\n2. 문제의 심각도와 서비스 영향도에 따라 긴급 복구 또는 계획된 유지보수를 진행합니다.\n3. 동일 문제 재발 방지를 위해 원인 분석 결과를 바탕으로 시스템 설정 변경, 코드 수정, 모니터링 강화 등의 후속 조치를 수행합니다.`;
                     break;
             }
             return { title: reportTitle, content: reportContent };
         }
         
-        // --- 자연어 처리 및 결과 표시 함수 (해석 로직 강화) ---
-        function interpretAndExecuteNLPQuery(query) {
+        function interpretAndExecuteNLPQuery(query) { /* 이전 답변의 강화된 해석 로직 그대로 사용 */
             showLoading();
             const explanationEl = document.getElementById('nlp-explanation');
             const resultListEl = document.getElementById('nlp-summary-list');
@@ -431,89 +463,121 @@
             resultListEl.innerHTML = ''; reportButtonContainer.innerHTML = ''; 
 
             let timeRange = 24; let serverType = 'all'; let alertFilter = 'all'; let location = 'all';
-            let interpretationParts = []; // 해석된 조건들을 담을 배열
-            let detectedReportType = 'generic_problem_summary'; // 기본값 변경
+            let interpretationParts = []; 
+            let detectedReportType = 'generic_problem_summary'; 
 
             const lowerQuery = query.toLowerCase();
-            const originalQueryForReport = query; // 보고서 생성 시 원본 질의 사용
+            const originalQueryForReport = query; 
 
             const selectedOption = document.querySelector(`#nlp-query-select option[value="${query}"]`);
             if (selectedOption && selectedOption.dataset.reportType) {
                 detectedReportType = selectedOption.dataset.reportType;
             }
 
-            // 1. 시간 범위 (정규식 활용 가능)
             const timePatterns = [
                 { pattern: /최근\s*(\d+)\s*시간/i, value: (match) => parseInt(match[1]), label: (m) => `최근 ${m[1]}시간`},
                 { pattern: /최근\s*(\d+)\s*일/i, value: (match) => parseInt(match[1]) * 24, label: (m) => `최근 ${m[1]}일`},
-                { pattern: /어제/i, value: () => 24, label: () => "어제 (지난 24시간 기준으로 단순화)"}, // 어제는 좀 더 복잡한 시간계산 필요
-                { pattern: /오늘/i, value: () => new Date().getHours(), label: () => "오늘 (00시부터 현재까지)"} // 오늘 00시부터 현재 시간까지
+                { pattern: /어제/i, value: () => { // 어제 00:00 ~ 23:59 (좀 더 정확하게)
+                        const today = new Date();
+                        const yesterdayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1, 0, 0, 0);
+                        const yesterdayEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1, 23, 59, 59);
+                        // applyFilters에서 이 특정 시간 범위를 처리할 수 있도록 수정 필요 또는 timeRangeHours로만 전달
+                        return 24; // 단순화: 일단 지난 24시간 (dataProcessor.applyFilters 수정 필요)
+                    }, label: () => "어제"},
+                { pattern: /오늘/i, value: () => new Date().getHours(), label: () => "오늘 (00시부터 현재까지)"}
             ];
             for (const tp of timePatterns) {
                 const match = lowerQuery.match(tp.pattern);
                 if (match) {
-                    timeRange = tp.value(match);
-                    interpretationParts.push(`시간: ${tp.label(match)}`);
+                    if (lowerQuery.includes("어제")) { // '어제' 키워드 특별 처리
+                         const today = new Date();
+                         const yesterdayStartMs = new Date(today.getFullYear(), today.getMonth(), today.getDate() -1, 0,0,0).getTime();
+                         const nowMs = today.getTime();
+                         timeRange = Math.max(1, Math.floor((nowMs - yesterdayStartMs) / (1000 * 60 * 60)) ); // 어제 00시부터 지금까지의 시간
+                         // 하지만 실제 데이터는 7일치이므로, '어제'는 24~48시간 전 데이터로 해석될 수 있음.
+                         // data_processor.js의 applyFilters에서 timeRangeHours 대신 startDate, endDate를 직접 받는 로직 추가 필요
+                         // 여기서는 일단 24시간 전부터 ~ 48시간 전까지의 데이터는 필터링 안되므로, "어제 BATCH 작업 상태"는 dummy data 생성시 어제 날짜로 이벤트를 만들어야함.
+                         // 또는 timeRange를 {start: Date, end: Date} 객체로 넘기는 방식 고려.
+                         // 현재는 가장 최근 24시간 기준으로 동작. "어제" 필터링은 data_processor에서 개선 필요.
+                         timeRange = 48; // 임시: 최근 48시간 내에서 어제 데이터가 포함되도록
+                         interpretationParts.push(`시간: 어제 (대략 최근 24-48시간)`);
+                    } else if (lowerQuery.includes("오늘")) {
+                        timeRange = new Date().getHours() +1; // 오늘 0시부터 현재시간까지
+                        interpretationParts.push(`시간: 오늘 (00시~현재)`);
+                    }
+                    else {
+                        timeRange = tp.value(match);
+                        interpretationParts.push(`시간: ${tp.label(match)}`);
+                    }
                     break;
                 }
             }
             
-            // 2. 서버 타입
             const uniqueServerTypes = dataProcessor ? dataProcessor.getUniqueServerTypes() : [];
             for (const type of uniqueServerTypes) {
                 if (lowerQuery.includes(type.toLowerCase())) {
                     serverType = type;
                     interpretationParts.push(`서버 유형: ${type}`);
+                    // detectedReportType 우선순위: 예시 질문 > 키워드 > 일반
+                    if (detectedReportType === 'generic_problem_summary' && type === 'DB') detectedReportType = 'disk_critical_db'; // 예시
+                    if (detectedReportType === 'generic_problem_summary' && type === 'WAS') detectedReportType = 'memory_leak_was'; // 예시
+                    if (detectedReportType === 'generic_problem_summary' && type === 'API') detectedReportType = 'network_top_api_6h'; // 예시
+                    if (detectedReportType === 'generic_problem_summary' && type === 'BATCH') detectedReportType = 'batch_job_yesterday'; // 예시
                     break; 
                 }
             }
-
-            // 3. 위치
+            
             const uniqueLocations = dataProcessor ? dataProcessor.getUniqueLocations() : [];
              for (const loc of uniqueLocations) {
-                if (query.includes(loc)) { // 위치는 대소문자 구분하여 원본에서 검색
+                if (query.includes(loc)) { 
                     location = loc;
                     interpretationParts.push(`위치: ${loc}`);
                     break;
                 }
             }
             
-            // 4. 경고 심각도 및 타입, 보고서 타입 결정 (좀 더 정교하게)
-            const alertKeywordsMap = {
-                'cpu': {filter: 'CPU', report: 'cpu'},
-                '메모리': {filter: 'Memory', report: 'memory'}, 'memory': {filter: 'Memory', report: 'memory'},
-                '디스크': {filter: 'Disk', report: 'disk'}, 'disk': {filter: 'Disk', report: 'disk'}, '공간 부족': {filter: 'Disk', report: 'disk_space_critical'},
-                '네트워크': {filter: 'Network', report: 'network'}, 'network': {filter: 'Network', report: 'network'}, '트래픽': {filter: 'Network', report: 'network_traffic_high'},
-                'critical': {filter: 'Critical', report: 'critical_servers_location'}, '심각': {filter: 'Critical', report: 'critical_servers_location'},
+            const alertKeywordsMap = { /* 이전과 동일 */
+                'cpu': {filter: 'CPU', report: 'cpu_high'},
+                '메모리': {filter: 'Memory', report: 'memory_leak_was'}, 'memory': {filter: 'Memory', report: 'memory_leak_was'},
+                '디스크': {filter: 'Disk', report: 'disk_critical_db'}, 'disk': {filter: 'Disk', report: 'disk_critical_db'}, '공간 부족': {filter: 'Disk', report: 'disk_space_critical'},
+                '네트워크': {filter: 'Network', report: 'network_traffic_high'}, 'network': {filter: 'Network', report: 'network_traffic_high'}, '트래픽': {filter: 'Network', report: 'network_traffic_high'},
+                'critical': {filter: 'Critical', report: 'critical_location_cause'}, '심각': {filter: 'Critical', report: 'critical_location_cause'},
                 'error': {filter: 'Error', report: 'error_status'}, '오류': {filter: 'Error', report: 'error_status'},
                 'warning': {filter: 'Warning', report: 'generic_problem_summary'}, '주의': {filter: 'Warning', report: 'generic_problem_summary'},
-                '애플리케이션': {filter: 'Application', report: 'application_error'}, 'application': {filter: 'Application', report: 'application_error'},
-                '보안': {filter: 'Security', report: 'security'}, 'security': {filter: 'Security', report: 'security'}, '로그인 실패': {filter: 'Security', report: 'security_login_fail'},
-                'batch': {filter: 'BATCH', report: 'batch_job_status'} // 서버타입과 연계
+                '애플리케이션': {filter: 'Application', report: 'application_orderservice_error'}, 'application': {filter: 'Application', report: 'application_orderservice_error'},
+                '보안': {filter: 'Security', report: 'security_login_fail_24h'}, 'security': {filter: 'Security', report: 'security_login_fail_24h'}, '로그인 실패': {filter: 'Security', report: 'security_login_fail_24h'},
             };
 
-            let matchedKeyword = false;
+            let matchedKeywordForFilter = false;
             for (const keyword in alertKeywordsMap) {
                 if (lowerQuery.includes(keyword)) {
                     alertFilter = alertKeywordsMap[keyword].filter;
                     // 예시 질문에서 명시적으로 reportType이 설정된 경우가 아니라면, 키워드로 reportType 추론
                     if (!selectedOption || !selectedOption.dataset.reportType) {
                          detectedReportType = alertKeywordsMap[keyword].report;
+                    } else if (selectedOption.dataset.reportType === 'generic_problem_summary' || !selectedOption.dataset.reportType) {
+                        // 예시 질문이 일반 요약이거나 reportType이 없다면 키워드 기반으로 설정
+                        detectedReportType = alertKeywordsMap[keyword].report;
                     }
-                    interpretationParts.push(`경고/상태: ${alertFilter}`);
-                    matchedKeyword = true;
+                    interpretationParts.push(`경고/상태 키워드: ${alertFilter}`);
+                    matchedKeywordForFilter = true;
                     break; 
                 }
             }
-            if(!matchedKeyword && selectedOption && selectedOption.dataset.reportType) { // 예시 질문의 reportType으로 fallback
-                 detectedReportType = selectedOption.dataset.reportType;
-                 // 필요시 이 reportType으로 alertFilter를 설정하는 로직 추가
+             // 만약 select에서 reportType이 명확히 지정되었고, 키워드에서 못찾았으면 select의 reportType 사용
+            if (!matchedKeywordForFilter && selectedOption && selectedOption.dataset.reportType && selectedOption.dataset.reportType !== 'generic_problem_summary') {
+                detectedReportType = selectedOption.dataset.reportType;
+                // 이 reportType으로 alertFilter를 유추하는 로직 추가 가능
+                if(detectedReportType.includes('cpu')) alertFilter = 'CPU';
+                else if(detectedReportType.includes('memory')) alertFilter = 'Memory';
+                // ... 등등
+                interpretationParts.push(`주요 분석 대상 (선택): ${detectedReportType.replace(/_/g, ' ').toUpperCase()}`);
             }
 
 
-            explanationEl.innerHTML = `<strong>해석된 조건:</strong> ${interpretationParts.length > 0 ? interpretationParts.join(', ') : "일반 전체 요약"}`;
+            explanationEl.innerHTML = `<strong>해석된 조건:</strong> ${interpretationParts.length > 0 ? interpretationParts.join('; ') : "일반 전체 요약"}`;
 
-            setTimeout(() => { /* ... (이하 로직은 이전 답변과 동일하게 유지) ... */
+            setTimeout(() => {
                 try {
                     if (!dataProcessor) { throw new Error("DataProcessor가 초기화되지 않았습니다."); }
                     const filteredNlpDataForSummary = dataProcessor.applyFilters(timeRange, serverType, alertFilter, location);
@@ -533,7 +597,6 @@
             }, 500); 
         }
         
-        // --- 기존 필터 기반 분석 함수 ---
         function applyAndRenderLegacyFilters() { /* 이전과 동일 */
             showLoading();
             setTimeout(() => {
