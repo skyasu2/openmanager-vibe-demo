@@ -773,6 +773,19 @@
                 hideLoading();
             }
         }
+function initializeLegacyFilters() {
+    if (!dataProcessor) { console.error("DataProcessor 초기화 필요"); return; }
+    
+    // 서버 유형 필터 설정
+    const serverTypeFilter = document.getElementById('server-type-filter');
+    const uniqueServerTypes = dataProcessor.getUniqueServerTypes();
+    populateDropdown(serverTypeFilter, uniqueServerTypes, '모든 서버 유형');
+    
+    // 위치 필터 설정
+    const locationFilter = document.getElementById('location-filter');
+    const uniqueLocations = dataProcessor.getUniqueLocations();
+    populateDropdown(locationFilter, uniqueLocations, '모든 위치');
+}
 
         // --- 페이지 초기화 ---
         document.addEventListener('DOMContentLoaded', function() {
