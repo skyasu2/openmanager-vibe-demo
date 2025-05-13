@@ -1,110 +1,179 @@
+<!-- index.html - 메인 페이지 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>OpenManager 7.0 요약 데모</title>
-  <!-- 자동 리다이렉션 메타 태그 제거 -->
-  <style>
-    body {
-      margin: 0;
-      background: linear-gradient(to bottom right, #001f3f, #001533);
-      color: white;
-      font-family: 'Segoe UI', sans-serif;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    h1 {
-      font-size: 36px;
-      color: #00bfff;
-      margin-bottom: 16px;
-    }
-    p {
-      max-width: 600px;
-      margin: 6px auto;
-      font-size: 16px;
-      line-height: 1.6;
-      color: #cccccc;
-    }
-    
-    /* 버튼 스타일 */
-    .demo-button {
-      background-color: #00bfff;
-      color: #001f3f;
-      border: none;
-      border-radius: 4px;
-      padding: 12px 24px;
-      font-size: 16px;
-      font-weight: bold;
-      margin-top: 24px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      text-decoration: none;
-      display: inline-block;
-    }
-    
-    .demo-button:hover {
-      background-color: #66d9ff;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-    
-    /* 로고 영역 */
-    .logo-area {
-      margin-bottom: 30px;
-    }
-    
-    .logo-area img {
-      width: 70px;
-      height: 70px;
-      background-color: white;
-      border-radius: 50%;
-      padding: 10px;
-      margin-bottom: 10px;
-    }
-    
-    /* 애니메이션 추가 */
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
-    }
-    
-    .animated {
-      animation: pulse 2s infinite;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenManager 7.0</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Malgun Gothic', 'Segoe UI', sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(245, 247, 250, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        
+        .loading-spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            font-size: 16px;
+            color: #2c3e50;
+        }
+        
+        .header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .nav-menu {
+            display: flex;
+        }
+        
+        .nav-item {
+            padding: 8px 15px;
+            margin-left: 5px;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        
+        .nav-item.active {
+            background-color: #3498db;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+        }
+        
+        .redirect-message {
+            text-align: center;
+            margin: 100px 0;
+        }
+        
+        .redirect-message h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        
+        .redirect-message p {
+            color: #7f8c8d;
+            margin-bottom: 30px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .footer {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            font-size: 14px;
+        }
+    </style>
 </head>
 <body>
-  <div class="logo-area">
-    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAxZjNmIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgY2xhc3M9ImZlYXRoZXIgZmVhdGhlci1zZXJ2ZXIiPjxyZWN0IHg9IjIiIHk9IjIiIHdpZHRoPSIyMCIgaGVpZ2h0PSI4IiByeD0iMiIgcnk9IjIiPjwvcmVjdD48cmVjdCB4PSIyIiB5PSIxNCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjgiIHJ4PSIyIiByeT0iMiI+PC9yZWN0PjxsaW5lIHg9IjYiIHkxPSI2IiB4Mj0iNi4wMSIgeTI9IjYiPjwvbGluZT48bGluZSB4PSI2IiB5MT0iMTgiIHgyPSI2LjAxIiB5Mj0iMTgiPjwvbGluZT48L3N2Zz4=" alt="OpenManager Logo">
-  </div>
-
-  <h1>OpenManager 7.0 요약 모듈 데모</h1>
-  <p>Cloud Native 환경을 위한 통합 모니터링 플랫폼을 체험해보세요.</p>
-  <p>아래 버튼을 클릭하여 데모를 시작합니다.</p>
-  
-  <!-- 데모 시작 버튼 - 클래스 animated 추가 -->
-  <a href="demo.html" class="demo-button animated">데모 시작하기</a>
-  
-  <script>
-    // 버튼 클릭 이벤트
-    document.addEventListener('DOMContentLoaded', function() {
-      document.querySelector('.demo-button').addEventListener('click', function() {
-        this.style.backgroundColor = '#0088cc';
-        
-        // 버튼에 로딩 텍스트 추가 (선택 사항)
-        this.textContent = '데모 로딩 중...';
-        
-        // 약간의 지연 후 페이지 이동 (선택 사항, 버튼 효과를 보기 위한 것)
-        // setTimeout(function() {
-        //   window.location.href = 'demo.html';
-        // }, 300);
-      });
-    });
-  </script>
+    <!-- 로딩 화면 -->
+    <div class="loading-screen" id="loading-screen">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">서버 데이터 로딩 중...</div>
+    </div>
+    
+    <!-- 헤더 네비게이션 -->
+    <div class="header">
+        <div class="logo">OpenManager 7.0</div>
+        <div class="nav-menu">
+            <a href="#" class="nav-item active">대시보드</a>
+            <a href="#" class="nav-item">서버 목록</a>
+            <a href="#" class="nav-item">경고 로그</a>
+            <a href="#" class="nav-item">설정</a>
+        </div>
+    </div>
+    
+    <!-- 메인 컨텐츠 -->
+    <div class="container">
+        <div class="redirect-message">
+            <h1>OpenManager 7.0 바이브 코딩 데모</h1>
+            <p>서버 상태 요약 데이터를 로드하고 있습니다. 잠시만 기다려주세요.</p>
+            <a href="demo.html" class="btn" id="continue-btn">서버 상태 요약 보기</a>
+        </div>
+    </div>
+    
+    <!-- 푸터 -->
+    <div class="footer">
+        &copy; 2025 OpenManager 7.0 - 바이브 코딩 데모
+    </div>
+    
+    <script>
+        // 서버 데이터를 시뮬레이션하기 위한 작업
+        document.addEventListener('DOMContentLoaded', function() {
+            // 몇 초간 로딩 화면을 보여준 후 버튼 활성화
+            setTimeout(function() {
+                document.getElementById('loading-screen').style.display = 'none';
+                document.getElementById('continue-btn').textContent = '서버 상태 요약 보기';
+            }, 2000);
+            
+            // 계속 버튼 클릭 시 자동으로 데모 페이지로 이동
+            document.getElementById('continue-btn').addEventListener('click', function(e) {
+                e.preventDefault();
+                window.location.href = 'demo.html';
+            });
+        });
+    </script>
 </body>
 </html>
